@@ -37,7 +37,7 @@ export const Signup = {
             });
             return response.data;
         } catch (error) {
-            console.error("Lỗi khi đăng ký người dùng:", error);
+            console.error("Loi khi đăng ký người dùng:", error);
             throw error;
         }
     }
