@@ -2,11 +2,12 @@ import React, { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import type { ValidationSignupResult } from '../utils/core/ValidateRegister';
 import { validate } from '../utils';
+import { message } from 'antd';
 
 export interface FormSignup {
     fullname: string,
     email: string,
-    phoneNum: string, 
+    phoneNum: string,
     password: string,
     confirmPassword: string,
 };
@@ -14,35 +15,39 @@ export interface FormSignup {
 export default function Register() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState<FormSignup | null>(null);
-    const [showError,setShowError] = useState<boolean>(false);
+    const [showError, setShowError] = useState<boolean>(false);
     const [errors, setErrors] = useState<string[]>([]);
 
     const handleSubmit = (e: FormEvent) => {
-        setFormData({
-            fullname: (e.target as any).fullname,
-            phoneNum: (e.target as any).phoneNum,
-            email: (e.target as any).email,
-            password: (e.target as any).password,
-            confirmPassword: (e.target as any).confirmPassword,
-        });
+        e.preventDefault();
 
-        const result: ValidationSignupResult = validate.signup(formData as FormSignup);
+        const data: FormSignup = {
+            fullname: (e.target as any).fullname.value, // chú ý tên field: fullName
+            phoneNum: (e.target as any).phoneNum.value,
+            email: (e.target as any).email.value,
+            password: (e.target as any).password.value,
+            confirmPassword: (e.target as any).confirmPassword.value,
+        };
 
-        {/*if (result.errors.length !== 0) {
-            setErrors(result.errors);
-        }*/}
+        const result = validate.signup(data);
 
         if (!result.isValid) {
             setErrors(result.errors);
             setShowError(true);
+            message.error("Vui lòng kiểm tra lại thông tin đăng ký!");
             return;
         }
 
-        alert("Đăng ký thanh công!");
-        navigate("/signin");
-    }
+        {/*alert("Đăng ký thành công!"*/ }
 
-    useEffect(() => {}, [showError]);
+        message.success("Đăng ký thành công!!");
+        setTimeout(() => {
+            navigate("/signin");
+        }, 1000);
+    };
+
+
+    useEffect(() => { }, [showError]);
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -58,7 +63,7 @@ export default function Register() {
                         </label>
                         <input
                             type="text"
-                            name="fullName"
+                            name="fullname"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter fullname"
                         />
@@ -113,7 +118,7 @@ export default function Register() {
                     </div>
 
                     {
-                        !showError && 
+                        showError &&
                         (<div className="space-y-1 mb-4">
                             {errors.map((item, index) => {
                                 return <p key={index} className="text-red-600 text-sm">{item}</p>

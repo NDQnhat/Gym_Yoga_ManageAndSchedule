@@ -10,7 +10,7 @@ export function ValidateRegister(data: FormSignup): ValidationSignupResult {
 
   for (const [key, value] of Object.entries(data)) {
     if (value.trim() === "") {
-      errors.push(`"${key}" không được để trống!!`);
+      errors.push(`${key} không được để trống!!`);
     }
   }
 
@@ -20,7 +20,7 @@ export function ValidateRegister(data: FormSignup): ValidationSignupResult {
   }
 
   if (data.password.length < 8) {
-    errors.push("Mật khẩu phải quá ngắn!!!");
+    errors.push("Mật khẩu quá ngắn!!!");
   }
 
   if (data.password !== data.confirmPassword) {
