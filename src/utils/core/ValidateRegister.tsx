@@ -29,7 +29,7 @@ export function ValidateRegister(data: FormSignup): ValidationSignupResult {
     errors.push("Mật khẩu quá ngắn!!!");
   }
 
-  if (data.password !== data.confirmPassword) {
+  if (data.password !== data.rePass) {
     errors.push("Mật khẩu xác nhận không khớp!");
   }
 

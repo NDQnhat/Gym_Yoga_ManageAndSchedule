@@ -1,24 +1,25 @@
 import React, { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
-import type { ValidationSignupResult } from '../utils/core/ValidateRegister';
+// import type { ValidationSignupResult } from '../utils/core/ValidateRegister';
 import { validate } from '../utils';
 import { message } from 'antd';
+import { registerUser } from '../stores/slices/user.slice';
 
 export interface FormSignup {
     fullname: string,
     email: string,
     phoneNum: string,
     password: string,
-    confirmPassword: string,
+    rePass: string,
 };
 
 export default function Register() {
     const navigate = useNavigate();
-    const [formData, setFormData] = useState<FormSignup | null>(null);
+    // const [formData, setFormData] = useState<FormSignup | null>(null);
     const [showError, setShowError] = useState<boolean>(false);
     const [errors, setErrors] = useState<string[]>([]);
 
-    const handleSubmit = (e: FormEvent) => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         const data: FormSignup = {
@@ -26,7 +27,7 @@ export default function Register() {
             phoneNum: (e.target as any).phoneNum.value,
             email: (e.target as any).email.value,
             password: (e.target as any).password.value,
-            confirmPassword: (e.target as any).confirmPassword.value,
+            rePass: (e.target as any).rePass.value,
         };
 
         const result = validate.signup(data);
@@ -38,12 +39,23 @@ export default function Register() {
             return;
         }
 
+        try {
+            await dispatch(registerUser(data));
+            message.success("Đăng ký thành công!");
+            setTimeout(() => {
+                navigate("/signin");
+            }, 1000);
+        } catch (err: any) {
+            message.error(err.message || "Đăng ký thất bại!");
+        }
+
+
         {/*alert("Đăng ký thành công!"*/ }
 
-        message.success("Đăng ký thành công!!");
-        setTimeout(() => {
+        // message.success("Đăng ký thành công!!");
+        // setTimeout(() => {
             navigate("/signin");
-        }, 1000);
+        // }, 1000);
     };
 
 
@@ -106,12 +118,12 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="rePass" className="block text-sm font-medium text-gray-700 mb-1">
                             Xác nhận mật khẩu
                         </label>
                         <input
                             type="password"
-                            name="confirmPassword"
+                            name="rePass"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Confirm your password"
                         />
@@ -145,3 +157,7 @@ export default function Register() {
         </div>
     )
 }
+function dispatch(arg0: any) {
+    throw new Error('Function not implemented.');
+}
+
