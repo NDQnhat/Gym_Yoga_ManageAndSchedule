@@ -1,5 +1,5 @@
-import { Signup } from "./core/Register"
+import { UserApi } from "./core/user.api";
 
 export const apis = {
-    signup: Signup,
+    userApi: UserApi,
 }

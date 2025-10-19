@@ -1,7 +1,5 @@
-import ValidateLogin from "./core/ValidateLogin";
-import {ValidateRegister} from "./core/ValidateRegister";
+import { validation } from "./core/validation";
 
 export const validate = {
-    signup: ValidateRegister,
-    signin: ValidateLogin,
+    validation: validation,
 }

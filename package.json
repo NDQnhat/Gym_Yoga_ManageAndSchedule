@@ -11,6 +11,7 @@
     "server": "json-server --watch db.json --port 888"
   },
   "dependencies": {
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
     "@reduxjs/toolkit": "^2.9.0",
     "@tailwindcss/vite": "^4.1.14",
     "antd": "^5.27.5",

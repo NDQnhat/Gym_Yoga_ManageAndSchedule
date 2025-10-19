@@ -1,9 +1,9 @@
 import React, { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 // import type { ValidationSignupResult } from '../utils/core/ValidateRegister';
-import { validate } from '../utils';
 import { message } from 'antd';
-import { registerUser } from '../stores/slices/user.slice';
+import { validation } from '../utils/core/validation';
+import { apis } from '../apis';
 
 export interface FormSignup {
     fullname: string,
@@ -13,53 +13,47 @@ export interface FormSignup {
     rePass: string,
 };
 
+export interface ErrorType {
+    fullname: string,
+    email: string[],
+    phoneNum: string,
+    password: string,
+    rePass: string,
+};
+
 export default function Register() {
     const navigate = useNavigate();
-    // const [formData, setFormData] = useState<FormSignup | null>(null);
-    const [showError, setShowError] = useState<boolean>(false);
-    const [errors, setErrors] = useState<string[]>([]);
+    const [errors, setErrors] = useState<ErrorType>({ fullname: "", email: [], phoneNum: "", password: "", rePass: "" });
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
         const data: FormSignup = {
-            fullname: (e.target as any).fullname.value, // chú ý tên field: fullName
+            fullname: (e.target as any).fullname.value,
             phoneNum: (e.target as any).phoneNum.value,
             email: (e.target as any).email.value,
             password: (e.target as any).password.value,
             rePass: (e.target as any).rePass.value,
         };
 
-        const result = validate.signup(data);
+        // client-side
+        const result = validation.signup(data);
+        setErrors(result);
 
-        if (!result.isValid) {
-            setErrors(result.errors);
-            setShowError(true);
-            message.error("Vui lòng kiểm tra lại thông tin đăng ký!");
-            return;
-        }
+        const hasError = Object.values(result).some(v =>
+            Array.isArray(v) ? v.length > 0 : v !== ""
+        );
+        if (hasError) return;
 
+        //cho server ktra email ton` tai.
         try {
-            await dispatch(registerUser(data));
+            await apis.userApi.registerUser(data);
             message.success("Đăng ký thành công!");
-            setTimeout(() => {
-                navigate("/signin");
-            }, 1000);
+            setTimeout(() => navigate("/signin"), 1000);
         } catch (err: any) {
-            message.error(err.message || "Đăng ký thất bại!");
+            message.error(err.message || "Fail to Sign up!!");
         }
-
-
-        {/*alert("Đăng ký thành công!"*/ }
-
-        // message.success("Đăng ký thành công!!");
-        // setTimeout(() => {
-            navigate("/signin");
-        // }, 1000);
     };
-
-
-    useEffect(() => { }, [showError]);
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -70,7 +64,7 @@ export default function Register() {
                     handleSubmit(e);
                 }} className="space-y-4">
                     <div>
-                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                        <label htmlFor="fullname" className="block text-sm font-medium text-gray-700 mb-1">
                             Họ và tên
                         </label>
                         <input
@@ -78,7 +72,11 @@ export default function Register() {
                             name="fullname"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter fullname"
+                            onChange={() =>
+                                setErrors(prev => ({ ...prev, fullname: "" }))
+                            }
                         />
+                        {errors.fullname && <p className='mt-1 text-sm text-red-600 bg-red-100 border border-red-300 rounded px-3 py-1'>{errors.fullname}</p>}
                     </div>
 
                     <div>
@@ -90,7 +88,22 @@ export default function Register() {
                             name="email"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter email"
+                            onChange={() =>
+                                setErrors(prev => ({ ...prev, email: [] }))
+                            }
                         />
+                        {errors.email.length > 0 && (
+                            <ul className="mt-1 space-y-1">
+                                {errors.email.map((item, idx) => (
+                                    <li
+                                        key={idx}
+                                        className="text-sm text-red-600 bg-red-100 border border-red-300 rounded px-3 py-1"
+                                    >
+                                        {item}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
 
                     <div>
@@ -102,7 +115,11 @@ export default function Register() {
                             name="phoneNum"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter your phone number"
+                            onChange={() =>
+                                setErrors(prev => ({ ...prev, phoneNum: "" }))
+                            }
                         />
+                        {errors.phoneNum && <p className='mt-1 text-sm text-red-600 bg-red-100 border border-red-300 rounded px-3 py-1'>{errors.phoneNum}</p>}
                     </div>
 
                     <div>
@@ -114,7 +131,11 @@ export default function Register() {
                             name="password"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Enter your password"
+                            onChange={() =>
+                                setErrors(prev => ({ ...prev, password: "" }))
+                            }
                         />
+                        {errors.password && <p className='mt-1 text-sm text-red-600 bg-red-100 border border-red-300 rounded px-3 py-1'>{errors.password}</p>}
                     </div>
 
                     <div>
@@ -126,17 +147,12 @@ export default function Register() {
                             name="rePass"
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             placeholder="Confirm your password"
+                            onChange={() =>
+                                setErrors(prev => ({ ...prev, rePass: "" }))
+                            }
                         />
+                        {errors.rePass && <p className='mt-1 text-sm text-red-600 bg-red-100 border border-red-300 rounded px-3 py-1'>{errors.rePass}</p>}
                     </div>
-
-                    {
-                        showError &&
-                        (<div className="space-y-1 mb-4">
-                            {errors.map((item, index) => {
-                                return <p key={index} className="text-red-600 text-sm">{item}</p>
-                            })}
-                        </div>)
-                    }
 
                     <button
                         className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition my-3"
@@ -148,16 +164,12 @@ export default function Register() {
                 <div className="mt-6 text-center text-sm text-gray-600">
                     Đã có tài khoản?
                     <button className="text-blue-600 hover:underline font-medium ms-1 cursor-pointer" onClick={() => {
-                        navigate("/signin")
+                        navigate("/signin");
                     }}>
-                        Đăng nhập ngay
+                        Login now
                     </button>
                 </div>
             </div>
         </div>
     )
 }
-function dispatch(arg0: any) {
-    throw new Error('Function not implemented.');
-}
-
