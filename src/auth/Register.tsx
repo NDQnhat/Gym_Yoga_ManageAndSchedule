@@ -3,7 +3,10 @@ import { useNavigate } from 'react-router'
 // import type { ValidationSignupResult } from '../utils/core/ValidateRegister';
 import { message } from 'antd';
 import { validation } from '../utils/core/validation';
-import { apis } from '../apis';
+// import { apis } from '../apis';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, StoreType } from '../stores';
+import { postUser } from '../stores/slices/user.slice';
 
 export interface FormSignup {
     fullname: string,
@@ -24,6 +27,8 @@ export interface ErrorType {
 export default function Register() {
     const navigate = useNavigate();
     const [errors, setErrors] = useState<ErrorType>({ fullname: "", email: [], phoneNum: "", password: "", rePass: "" });
+    const dispatch = useDispatch<AppDispatch>();
+    const userStore = useSelector((state: StoreType) => state);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -46,13 +51,21 @@ export default function Register() {
         if (hasError) return;
 
         //cho server ktra email ton` tai.
-        try {
-            await apis.userApi.registerUser(data);
-            message.success("Đăng ký thành công!");
+        const response = await dispatch(postUser(data));
+
+        if (postUser.fulfilled.match(response)) {
+            message.success("Sign up successfully!");
             setTimeout(() => navigate("/signin"), 1000);
-        } catch (err: any) {
-            message.error(err.message || "Fail to Sign up!!");
+        } else {
+            message.error((response.error as any).message || "Fail to Sign up!!");
         }
+        // try {
+        //     await apis.userApi.registerUser(data);
+        //     message.success("Sign up successfully!");
+        //     setTimeout(() => navigate("/signin"), 1000);
+        // } catch (err: any) {
+        //     message.error(err.message || "Fail to Sign up!!");
+        // }
     };
 
     return (

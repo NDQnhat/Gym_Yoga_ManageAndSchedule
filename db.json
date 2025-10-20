@@ -31,6 +31,14 @@
       "phoneNum": "0987654321",
       "password": "12345678",
       "role": "user"
+    },
+    {
+      "id": "dbef",
+      "fullname": "asdsad",
+      "email": "nvab@gmail.com",
+      "phoneNum": "0987654321",
+      "password": "12345678",
+      "role": "user"
     }
   ],
   "courses": [
