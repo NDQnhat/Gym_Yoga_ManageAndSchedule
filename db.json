@@ -48,7 +48,7 @@
       "type": "Meditation",
       "description": "Giúp bạn thư giãn và cân bằng cảm xúc.",
       "price": 120000,
-      "imageUrl": "/assets/meditation.jpg"
+      "imageUrl": "https://www.bing.com/th/id/OIP.tdjEoTxIFsgrSX3ztLLTKQHaEj?w=186&h=135&c=8&rs=1&qlt=90&o=6&cb=12&dpr=1.3&pid=3.1&rm=2"
     },
     {
       "id": "202",
@@ -56,7 +56,7 @@
       "type": "Dance",
       "description": "Tập luyện theo nhạc, đốt cháy năng lượng.",
       "price": 180000,
-      "imageUrl": "/assets/zumba.jpg"
+      "imageUrl": "https://th.bing.com/th/id/OIP.9aI52ZSOsNi90PxoXmi0ggHaE9?w=219&h=180&c=7&r=0&o=7&cb=12&dpr=1.3&pid=1.7&rm=3"
     }
   ],
   "bookings": [

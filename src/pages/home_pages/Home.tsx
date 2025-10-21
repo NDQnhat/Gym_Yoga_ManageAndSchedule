@@ -1,44 +1,27 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Card from "../../components/Card"
-
-// img dung` tam.
-import cardimg1 from "../../assets/cardimg1.png"
-import cardimg2 from "../../assets/cardimg2.png"
-import cardimg3 from "../../assets/cardimg3.png"
 import { useNavigate } from 'react-router'
 import Footer from '../../components/Footer'
 import Header from '../../components/Header'
+import { getCourses } from '../../stores/slices/course.thunk'
+import type { Course } from '../../types/course.type'
+// import { message } from 'antd'
+import { useDispatch, useSelector } from 'react-redux'
+import type { AppDispatch, StoreType } from '../../stores'
 
 export default function Home() {
     const navigate = useNavigate();
+    // Không cần state cục bộ courses nữa
+    const dispatch = useDispatch<AppDispatch>();
+    const { data, loading, error } = useSelector((state: StoreType) => state.courseThunk);
 
-    const classes = [
-        {
-            id: 1,
-            image: cardimg1,
-            title: 'Gym',
-            description: 'Tập luyện với các thiết bị hiện đại',
-            buttonText: 'Đặt lịch'
-        },
-        {
-            id: 2,
-            image: cardimg2,
-            title: 'Yoga',
-            description: 'Thư giãn và cân bằng tâm trí',
-            buttonText: 'Đặt lịch'
-        },
-        {
-            id: 3,
-            image: cardimg3,
-            title: 'Zumba',
-            description: 'Đốt cháy calories với những điệu nhảy sôi động',
-            buttonText: 'Đặt lịch'
-        }
-    ];
+    useEffect(() => {
+        dispatch(getCourses());
+    }, [dispatch]);
 
     return (
         <div className="min-h-screen">
-            <Header/>
+            <Header />
 
             {/* <section className="relative h-[745px] flex items-center justify-center bg-[url('/src/assets/gym-bg.jpg')] bg-cover bg-center"> */}
             <section className="relative h-[196px] md:h-[428px] lg:h-[745] flex items-center justify-center bg-[url('/src/assets/home-gym-bg-test.jpg')] bg-cover bg-center"> {/*hinh` anh? mau~ */}
@@ -54,21 +37,22 @@ export default function Home() {
             <section className="py-16 px-6 bg-gray-50">
                 <div className="max-w-7xl mx-auto">
                     <h2 className="text-4xl font-bold text-center mb-12">Các lớp học phổ biến</h2>
+                    {loading && <p className='text-center'>Đang tải khóa học...</p>}
+                    {error && <p className="text-red-500">{error}</p>}
                     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8">
-                        {classes.map((classItem) => (
+                        {Array.isArray(data) && data.length > 0 && data.map((item: Course) => (
                             <Card
-                                key={classItem.id}
-                                image={classItem.image}
-                                title={classItem.title}
-                                description={classItem.description}
-                                buttonText={classItem.buttonText}
+                                key={item.id}
+                                image={item.imageUrl}
+                                title={item.name}
+                                description={item.description}
                             />
                         ))}
                     </div>
                 </div>
             </section>
 
-            <Footer/>
+            <Footer />
         </div>
     );
 }

@@ -54,7 +54,7 @@ export const UserApi = {
   findNameById: async (id: string) => {
     const user = await axios.get(`${API_URL}/users/${id}`);
 
-    console.log(user);
+    // console.log(user);
     // alert("stop");
     
     if (user.data.length === 0) {

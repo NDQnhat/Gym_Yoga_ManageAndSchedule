@@ -41,10 +41,10 @@ export default function Header() {
 
                     {currentUserRole === "admin" ? 
                         <button className="hover:text-gray-300 cursor-pointer" onClick={() => {
-                            navigate("/");
+                            navigate("/admin");
                         }}>Quản lý</button>
                         : <button className="hover:text-gray-300 cursor-pointer" onClick={() => {
-                            // navigate("/");
+                            navigate("/booking");
                         }}>Lịch tập</button>
                     }
 

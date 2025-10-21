@@ -22,13 +22,13 @@ export const userThunk = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchUserData.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(fetchUserData.fulfilled, (state, action) => {
-        state.loading = false;
-        // state.user = action.payload;
-      })
+      // .addCase(fetchUserData.pending, (state) => {
+      //   state.loading = true;
+      // })
+      // .addCase(fetchUserData.fulfilled, (state, action) => {
+      //   state.loading = false;
+      //   // state.user = action.payload;
+      // })
       // .addCase(fetchUserData.rejected, (state, action) => {
       // });
       .addCase(postUser.pending, (state) => {
@@ -58,10 +58,10 @@ export const userThunk = createSlice({
   },
 });
 
-const fetchUserData = createAsyncThunk("user/fetchUserData", async () => {
-  // let result = await Apis.user.findById(localStorage.getItem("userLogin"))
-  // return result.data
-});
+// const fetchUserData = createAsyncThunk("user/fetchUserData", async () => {
+//   // let result = await Apis.user.findById(localStorage.getItem("userLogin"))
+//   // return result.data
+// });
 
 export const postUser = createAsyncThunk("user/postUser", async (data: FormSignup) => {
   let result = await apis.userApi.registerUser(data);
@@ -74,4 +74,4 @@ export const checkSigninData = createAsyncThunk("users/checkSigninData", async (
 });
 
 export const userThunkReducer = userThunk.reducer;
-export const userAction = userThunk.actions;
+export const userThunkAction = userThunk.actions;

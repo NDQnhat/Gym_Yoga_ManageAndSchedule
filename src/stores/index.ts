@@ -1,10 +1,12 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { userThunkReducer } from "./slices/user.thunk";
 import { userReducer } from "./slices/user.slice";
+import { courseThunkReducer } from "./slices/course.thunk";
 
 const RootReducer = combineReducers({
     userThunk: userThunkReducer,
     user: userReducer,
+    courseThunk: courseThunkReducer,
 });
 
 export const myStore = configureStore({
