@@ -6,7 +6,7 @@ import { validation } from '../utils/core/validation';
 // import { apis } from '../apis';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, StoreType } from '../stores';
-import { postUser } from '../stores/slices/user.slice';
+import { postUser } from '../stores/slices/user.thunk';
 
 export interface FormSignup {
     fullname: string,
@@ -17,18 +17,18 @@ export interface FormSignup {
 };
 
 export interface ErrorType {
-    fullname: string,
+    fullname?: string,
     email: string[],
-    phoneNum: string,
+    phoneNum?: string,
     password: string,
-    rePass: string,
+    rePass?: string,
 };
 
 export default function Register() {
     const navigate = useNavigate();
     const [errors, setErrors] = useState<ErrorType>({ fullname: "", email: [], phoneNum: "", password: "", rePass: "" });
     const dispatch = useDispatch<AppDispatch>();
-    const userStore = useSelector((state: StoreType) => state);
+    const userThunkStore = useSelector((state: StoreType) => state.userThunk);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();

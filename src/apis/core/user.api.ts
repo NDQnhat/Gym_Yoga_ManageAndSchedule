@@ -1,5 +1,7 @@
 import axios from "axios";
 import type { FormSignup } from "../../auth/Register";
+import type { FormSignin } from "../../auth/Login";
+import { message } from "antd";
 
 // export interface UserDTO {
 //   email: string;
@@ -30,4 +32,38 @@ export const UserApi = {
 
     return res.data;
   },
+
+  loginUser: async (data: FormSignin) => {
+    const emailCheck = await axios.get(`${API_URL}/users?email=${data.email}`);
+    if (emailCheck.data.length === 0) {
+      throw {
+        message: "Email not Existed in Database!!",
+      };
+    }
+    // console.log(emailCheck.data); => [] neu' khong co' hoac. neu' co' la` [{...},...]
+
+    if (data.password !== emailCheck.data[0].password) {
+      throw {
+        message: "Password Incorrect!!!",
+      };
+    }
+
+    return emailCheck.data;
+  },
+
+  findNameById: async (id: string) => {
+    const user = await axios.get(`${API_URL}/users/${id}`);
+
+    console.log(user);
+    // alert("stop");
+    
+    if (user.data.length === 0) {
+      throw {
+        message: "User not existed in Database!",
+      };
+    }
+
+    return user.data.fullname;
+  },
+
 };

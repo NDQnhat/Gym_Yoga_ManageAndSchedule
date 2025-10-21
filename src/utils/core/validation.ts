@@ -1,3 +1,4 @@
+import type { FormSignin } from "../../auth/Login";
 import type { ErrorType, FormSignup } from "../../auth/Register";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -37,4 +38,21 @@ export const validation = {
 
     return errors;
   },
+
+  signin: (data: FormSignin) => {
+    const errors: FormSignin = {email: "", password: ""};
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!data.email.trim()) {
+      errors.email = "Email required!";
+    } else if (!emailRegex.test(data.email)) {
+      errors.email = "Invalid email format!";
+    }
+
+    if(data.password.length === 0) {
+      errors.password = "Password required!!!";
+    }
+    
+    return errors;
+  }
 };

@@ -1,7 +1,9 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
+import { userThunkReducer } from "./slices/user.thunk";
 import { userReducer } from "./slices/user.slice";
 
 const RootReducer = combineReducers({
+    userThunk: userThunkReducer,
     user: userReducer,
 });
 
