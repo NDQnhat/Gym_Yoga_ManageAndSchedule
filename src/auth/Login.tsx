@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from "react-router";
 import { validation } from '../utils/core/validation';
 // import { apis } from '../apis';
@@ -44,7 +44,7 @@ export default function Login() {
             // userStore.data = response.payload;
             dispatch(userAction.setUser(response.payload[0]));
             message.success("Sign in successfully!");
-            if(localStorage.getItem("currentRole") == "admin") {
+            if (localStorage.getItem("currentRole") == "admin") {
                 setTimeout(() => navigate("/admin"), 1000);
                 return;
             }
@@ -53,6 +53,19 @@ export default function Login() {
             message.error((response.error as any).message || "Fail to Sign in!!");
         }
     };
+
+    useEffect(() => {
+        if (localStorage.getItem("currentUserId")) {
+            message.success("You have already sign in!!");
+            setTimeout(() => {
+                if (localStorage.getItem("currentRole") == "admin") {
+                    navigate("/admin");
+                    return;
+                }
+                navigate("/");
+            }, 1000);
+        }
+    });
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

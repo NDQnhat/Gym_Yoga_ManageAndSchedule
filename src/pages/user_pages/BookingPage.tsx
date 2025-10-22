@@ -1,10 +1,19 @@
 import { Button, message, Modal, Table } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
+import type { Bookings } from '../../types/bookings.type';
+import { useDispatch, useSelector } from 'react-redux';
+import type { AppDispatch, StoreType } from '../../stores';
+import { getBookings } from '../../stores/slices/bookings.thunk';
+import type { UserBookings } from '../../types/user_bookings.type';
+import ConvertBookings from './ConvertBookings';
 
 export default function BookingPage() {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tableData, setTableData] = useState<UserBookings[]>([]);
+  const store = useSelector((state: StoreType) => state.bookingsThunk.data);
+  const dispatch = useDispatch<AppDispatch>();
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -21,23 +30,23 @@ export default function BookingPage() {
   const columns = [
     {
       title: 'Lớp học',
-      dataIndex: 'className',
-      key: 'className',
+      dataIndex: 'course',
+      key: 'course',
     },
     {
       title: 'Ngày tập',
-      dataIndex: 'date',
-      key: 'date',
+      dataIndex: 'bookingDate',
+      key: 'bookingDate',
     },
     {
       title: 'Khung giờ',
-      dataIndex: 'timeSlot',
-      key: 'timeSlot',
+      dataIndex: 'bookingTime',
+      key: 'bookingTime',
     },
     {
       title: 'Họ tên',
-      dataIndex: 'fullName',
-      key: 'fullName',
+      dataIndex: 'fullname',
+      key: 'fullname',
     },
     {
       title: 'Email',
@@ -56,7 +65,6 @@ export default function BookingPage() {
       ),
     },
   ];
-  const data: any = [];
 
   useEffect(() => {
     if (!localStorage.getItem("currentUserId")) {
@@ -64,6 +72,28 @@ export default function BookingPage() {
       setTimeout(() => { navigate("/signin") }, 500);
     }
   });
+
+  useEffect(() => {
+    const userId = localStorage.getItem("currentUserId");
+    if (!userId) {
+      message.error("Log in required!!");
+      setTimeout(() => navigate("/signin"), 500);
+      return;
+    }
+    const fetchData = async () => {
+      try {
+        const action = await dispatch(getBookings(userId));
+        if (getBookings.fulfilled.match(action)) {
+          const bookings = action.payload;
+          const converted = await ConvertBookings(bookings);
+          setTableData(converted);
+        }
+      } catch (error) {
+        message.error((error as any).message);
+      }
+    };
+    fetchData();
+  }, [dispatch, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -119,9 +149,10 @@ export default function BookingPage() {
           <div className="pb-6">
             <Table
               columns={columns}
-              dataSource={data}
+              dataSource={tableData}
               pagination={false}
               locale={{ emptyText: 'Không có dữ liệu' }}
+              rowKey={(record) => record.bookingDate + record.bookingTime + record.email}
             />
           </div>
         </div>

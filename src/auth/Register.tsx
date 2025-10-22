@@ -68,6 +68,19 @@ export default function Register() {
         // }
     };
 
+    useEffect(() => {
+        if (localStorage.getItem("currentUserId")) {
+            message.success("You have already sign in!!");
+            setTimeout(() => {
+                if (localStorage.getItem("currentRole") == "admin") {
+                    navigate("/admin");
+                    return;
+                }
+                navigate("/");
+            }, 1000);
+        }
+    });
+
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
             <div className="bg-white rounded-lg shadow-md w-full max-w-md p-8">

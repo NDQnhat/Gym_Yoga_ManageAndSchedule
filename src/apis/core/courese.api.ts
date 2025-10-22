@@ -14,4 +14,15 @@ export const CourseApi = {
         }
     }
   },
+
+  getCourseName: async (id: string) => {
+    try {
+      let result = await axios.get(`${API_URL}/courses/${id}`);
+      return result.data.name;
+    } catch (error) {
+      throw {
+        message: "Fail to get course with id: " + id,
+      }
+    }
+  }
 };

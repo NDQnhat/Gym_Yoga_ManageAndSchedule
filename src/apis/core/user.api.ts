@@ -56,7 +56,7 @@ export const UserApi = {
 
     // console.log(user);
     // alert("stop");
-    
+
     if (user.data.length === 0) {
       throw {
         message: "User not existed in Database!",
@@ -66,4 +66,14 @@ export const UserApi = {
     return user.data.fullname;
   },
 
+  findEmailById: async (id: string) => {
+    try {
+      const user = await axios.get(`${API_URL}/users/${id}`);
+      return user.data.email;
+    } catch (error) {
+      throw {
+        message: "Fail to get email of user!!",
+      };
+    }
+  },
 };
