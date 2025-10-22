@@ -1,4 +1,4 @@
-import { Button, message, Modal, Table } from 'antd'
+import { Button, DatePicker, message, Modal, Table, type DatePickerProps } from 'antd'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router';
 import type { Bookings } from '../../types/bookings.type';
@@ -66,6 +66,10 @@ export default function BookingPage() {
     },
   ];
 
+  const onChange: DatePickerProps['onChange'] = (date, dateString) => {
+    console.log(date, dateString);
+  };
+
   useEffect(() => {
     if (!localStorage.getItem("currentUserId")) {
       message.error("Sign in required");
@@ -130,7 +134,8 @@ export default function BookingPage() {
                 </div>
                 <div className='my-3'>
                   <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
-                  <input type="date" id="date" name="date" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                  {/* <input type="date" id="date" name="date" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" /> */}
+                  <DatePicker onChange={onChange} className='w-full' style={{border: "1px solid black"}} />
                 </div>
                 <div className='my-3'>
                   <label htmlFor="timeSlot" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
