@@ -17,6 +17,7 @@ export default function Home() {
 
     useEffect(() => {
         dispatch(getCourses());
+        // console.log(typeof localStorage.getItem("currentRole"));
     }, [dispatch]);
 
     return (

@@ -44,6 +44,10 @@ export default function Login() {
             // userStore.data = response.payload;
             dispatch(userAction.setUser(response.payload[0]));
             message.success("Sign in successfully!");
+            if(localStorage.getItem("currentRole") == "admin") {
+                setTimeout(() => navigate("/admin"), 1000);
+                return;
+            }
             setTimeout(() => navigate("/"), 1000);
         } else {
             message.error((response.error as any).message || "Fail to Sign in!!");

@@ -31,7 +31,7 @@ export default function Header() {
     return (
         <header className="bg-slate-800 text-white py-4 px-6 sticky top-0 z-999">
             <div className="max-w-7xl mx-auto flex justify-between items-center">
-                <h1 className="text-2xl font-bold cursor-pointer" onClick={() => {
+                <h1 className="text-2xl font-bold pointer-events-none" onClick={() => {
                     navigate("/");
                 }}>GYM MANAGEMENT</h1>
                 <nav className="flex gap-6">
