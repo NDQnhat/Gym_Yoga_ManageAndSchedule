@@ -1,16 +1,61 @@
-import axios from "axios"
+import axios from "axios";
+import type { Bookings } from "../../types/bookings.type";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
 export const BookingsApi = {
-    getUserBookings: async (id: string) => {
-        try {
-            let result = await axios.get(`${API_URL}/bookings?userId=${id}`);
-            return result.data;
-        } catch (error) {
-            throw {
-                message: "Tải lịch tập thất bại: " + error,
-            }
-        }
+  getUserBookings: async (id: string, currentPage: number, perPage: number) => {
+    try {
+      let result = await axios.get(
+        `${API_URL}/bookings?userId=${id}&_page=${currentPage}&_per_page=${perPage}`
+      );
+      // json-server v1 trả về { data: [...] }, v0.17 trả về mảng trực tiếp
+      if (Array.isArray(result.data)) {
+        return result.data;
+      } else if (result.data && Array.isArray(result.data.data)) {
+        return result.data.data;
+      } else {
+        return [];
+      }
+    } catch (error) {
+      throw {
+        message: "Tải lịch tập thất bại: " + error,
+      };
     }
-}
+  },
+
+  postNewBookings: async (data: Bookings) => {
+    try {
+      const res = await axios.post(`${API_URL}/bookings`, data);
+      return res.data;
+    } catch (error) {
+      throw {
+        message: "Fail to make new Bookings: " + error,
+      };
+    }
+  },
+
+  getUserBookingsQuantity: async (id: string) => {
+    try {
+      let result = await axios.get(`${API_URL}/bookings?userId=${id}`);
+      return result.data.length;
+    } catch (error) {
+      throw {
+        message: "Lấy số lượng thất bại: " + error,
+      };
+    }
+  },
+
+  getAll: async (id: string) => {
+    try {
+      // let result = await axios.get(`${API_URL}/bookings?userId=${id}`);
+      // return result.data;
+      let result = await axios.get(`${API_URL}/bookings?userId=${id}`);
+      return result.data;
+    } catch (error) {
+      throw {
+        message: "Lỗi: " + error,
+      };
+    }
+  },
+};

@@ -1,5 +1,5 @@
 export interface Bookings {
-    id:string,
+    id?:string,
     userId: string,
     courseId: string,
     bookingDate: string,

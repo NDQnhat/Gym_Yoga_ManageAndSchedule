@@ -1,15 +1,16 @@
-import { Button, DatePicker, message, Modal, Table, type DatePickerProps } from 'antd'
+import { Button, DatePicker, Empty, message, Modal, Pagination, Popconfirm, Table, type DatePickerProps } from 'antd'
 import React, { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router';
 import type { Bookings } from '../../types/bookings.type';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, StoreType } from '../../stores';
-import { getBookings } from '../../stores/slices/bookings.thunk';
+import { getBookings, makeNewBookings } from '../../stores/slices/bookings.thunk';
 import type { UserBookings } from '../../types/user_bookings.type';
 import ConvertBookings from './ConvertBookings';
 import type { Course } from '../../types/course.type';
 import { getCourses } from '../../stores/slices/course.thunk';
 import { validateBookingModal } from '../../utils/core/validate.booking_modal';
+import { apis } from '../../apis';
 
 export default function BookingPage() {
   const navigate = useNavigate();
@@ -19,6 +20,10 @@ export default function BookingPage() {
   const dispatch = useDispatch<AppDispatch>();
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [dateChosen, setDateChosen] = useState("");
+  const [confirmToDel, setConfirmToDel] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(5);
+  const [bookingsQuantity, setBookingsQuantity] = useState(0);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -26,8 +31,9 @@ export default function BookingPage() {
     // console.log(typeof dateChosen);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
+  const handleCancel = (type?: 'add' | 'delete') => {
+    if (type === 'add') setIsModalOpen(false);
+    if (type === 'delete') setConfirmToDel(false);
   };
 
   const columns = [
@@ -63,7 +69,17 @@ export default function BookingPage() {
       render: () => (
         <div className="flex gap-2">
           <Button type="link" className="p-0">Sửa</Button>
-          <Button type="link" danger className="p-0">Xóa</Button>
+          <Button type="link" onClick={() => setConfirmToDel(true)} danger className="p-0">Xóa</Button>
+          {/* <Popconfirm
+            title="Delete the bookings"
+            description="Are you sure to delete this bookings?"
+            // onConfirm={confirm}
+            // onCancel={cancel}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="link" danger className="p-0">Xóa</Button>
+          </Popconfirm> */}
         </div>
       ),
     },
@@ -82,7 +98,7 @@ export default function BookingPage() {
     }
   });
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const userId = localStorage.getItem('currentUserId') || '';
     const courseName = (e.target as any).course?.value || '';
@@ -91,23 +107,53 @@ export default function BookingPage() {
     const bookingDate = dateChosen;
     const bookingTime = (e.target as any).bookingTime?.value || '';
 
+    // Fetch toàn bộ bookings của user để kiểm tra trùng lặp
+    let allUserBookings: Bookings[] = [];
+    try {
+      const res = await apis.bookingsApi.getAll(userId);
+      allUserBookings = res;
+    } catch (err) {
+      message.error('Không thể kiểm tra trùng lặp lịch tập!');
+      return;
+    }
+
     const errors = validateBookingModal(
       { userId, courseId, bookingDate, bookingTime },
-      store // store là bookingsThunk.data
+      allUserBookings
     );
     if (errors.length > 0) {
       message.error(errors.map(e => e.message).join(' '));
       return;
     }
-    // khi form đóng thì tự đổi sang option đuầ tiên trong select ?????
-    console.log(courseName);
-    console.log(bookingTime);
-    
-    message.success("Thêm lịch mới thành công!");
-    (e.target as any).reset(); //khong rest form??
+
+    const newBookings: Bookings = {
+      userId,
+      courseId,
+      status: "confirmed",
+      bookingTime,
+      bookingDate
+    };
+
+    try {
+      const action = await dispatch(makeNewBookings(newBookings));
+      if (makeNewBookings.fulfilled.match(action)) {
+        message.success("Thêm lịch mới thành công!");
+        setIsModalOpen(false);
+        const refreshed = await dispatch(getBookings({ id: userId, currentPage, perPage }));
+        if (getBookings.fulfilled.match(refreshed)) {
+          const converted = await ConvertBookings(refreshed.payload);
+          setTableData(converted);
+        }
+      }
+    } catch (error) {
+      message.error((error as any).message);
+    }
     setIsModalOpen(false);
-    // ...existing logic submit booking...
   }
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useEffect(() => {
     const userId = localStorage.getItem("currentUserId");
@@ -118,11 +164,15 @@ export default function BookingPage() {
     }
     const fetchData = async () => {
       try {
-        const action = await dispatch(getBookings(userId));
+        const action = await dispatch(getBookings({ id: userId, currentPage, perPage }));
+        const quantity = await apis.bookingsApi.getUserBookingsQuantity(userId);
+        setBookingsQuantity(quantity);
         if (getBookings.fulfilled.match(action)) {
           const bookings = action.payload;
           const converted = await ConvertBookings(bookings);
           setTableData(converted);
+        } else {
+          setTableData([]);
         }
 
         const courseAction = await dispatch(getCourses());
@@ -131,10 +181,11 @@ export default function BookingPage() {
         }
       } catch (error) {
         message.error((error as any).message);
+        setTableData([]);
       }
     };
     fetchData();
-  }, [store]);
+  }, [currentPage, perPage]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -154,6 +205,7 @@ export default function BookingPage() {
               Đặt lịch mới
             </Button>
             <Modal
+              key={isModalOpen ? 'open' : 'closed'} // isModalOpen thay doi? -> key cua? modal thya doi? theo -> unmount va` reumount tu` dau`
               title="Đặt lịch mới"
               open={isModalOpen}
               onOk={() => {
@@ -162,15 +214,15 @@ export default function BookingPage() {
                 // setIsModalOpen(false);
               }}
               okText="Lưu"
-              onCancel={handleCancel}
+              onCancel={() => handleCancel("add")}
               cancelText="Hủy"
               cancelButtonProps={{ style: { background: "gray", color: "whitesmoke" } }}
             >
-              <form id='modalFormAdd' onSubmit={(e) => {handleSubmit(e)}}>
+              <form id='modalFormAdd' onSubmit={(e) => { handleSubmit(e) }}>
                 <div className='my-3'>
                   <label htmlFor="class" className="block mb-1 font-medium text-gray-700">Lớp học</label>
-                  <select id="course" name="course" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option disabled selected value="">-- Chọn lớp học --</option>
+                  <select id="course" defaultValue="" name="course" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option disabled value="">-- Chọn lớp học --</option>
                     {allCourses && allCourses.map((course) => (
                       <option key={course.id} value={course.name}>{course.name}</option>
                     ))}
@@ -179,12 +231,12 @@ export default function BookingPage() {
                 <div className='my-3'>
                   <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
                   {/* <input type="date" id="date" name="date" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" /> */}
-                  <DatePicker onChange={onChange} className='w-full' style={{border: "1px solid black"}} />
+                  <DatePicker onChange={onChange} className='w-full' style={{ border: "1px solid black" }} />
                 </div>
                 <div className='my-3'>
                   <label htmlFor="bookingTime" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
-                  <select id="bookingTime" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option disabled selected value="">-- Chọn khung giờ --</option>
+                  <select id="bookingTime" defaultValue="" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option disabled value="">-- Chọn khung giờ --</option>
                     <option value="07:00 - 09:00">Sáng (07:00 - 09:00)</option>
                     <option value="14:00 - 16:00">Chiều (14:00 - 16:00)</option>
                     <option value="18:00 - 20:00">Tối (18:00 - 20:00)</option>
@@ -200,9 +252,23 @@ export default function BookingPage() {
               columns={columns}
               dataSource={tableData}
               pagination={false}
-              locale={{ emptyText: 'Không có dữ liệu' }}
+              // locale={{ emptyText: 'Không có dữ liệu' }}
+              locale={{
+                emptyText: <Empty description="Bạn chưa co lịch tập nào!!" />,
+              }}
               rowKey={(record) => record.bookingDate + record.bookingTime + record.email}
             />
+            <Pagination align="end" current={currentPage} pageSize={perPage} total={bookingsQuantity} onChange={onPageChange} style={{ marginTop: "24px" }} />
+            <Modal
+              title="Bạn có xác nhận muốn xóa lịch đặt này?"
+              open={confirmToDel}
+              onOk={() => setConfirmToDel(false)}
+              okText="Xóa"
+              okButtonProps={{ style: { background: "#f5222d", color: "whitesmoke" } }}
+              onCancel={() => handleCancel("delete")}
+              cancelText="Hủy"
+              cancelButtonProps={{ style: { background: "gray", color: "whitesmoke" } }}
+            ></Modal>
           </div>
         </div>
       </main>

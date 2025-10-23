@@ -32,13 +32,30 @@ export const bookingsThunk = createSlice({
             state.loading = false;
             state.error = action.error.message || "Có lỗi xảy ra!";
         })
+        .addCase(makeNewBookings.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(makeNewBookings.fulfilled, (state, action) => {
+            state.loading = false;
+            // state.data.push(action.payload);
+        })
+        .addCase(makeNewBookings.rejected, (state) => {
+            state.loading = false;
+        })
     }
 });
 
-export const getBookings = createAsyncThunk<Bookings[], string>("fetchBookingsData", async (id) => {
-    let res = await apis.bookingsApi.getUserBookings(id);
+export const getBookings = createAsyncThunk<Bookings[], {id: string, currentPage: number, perPage: number}>("fetchBookingsData", async ({id, currentPage, perPage}) => {
+    let res = await apis.bookingsApi.getUserBookings(id, currentPage, perPage);
     return res;
 });
+
+export const makeNewBookings = createAsyncThunk("postNewBookings", async (data: Bookings) => {
+    let res = await apis.bookingsApi.postNewBookings(data);
+    return res;
+});
+
+export const deleteBookings = createAsyncThunk("bookings/delete", async () => {});
 
 export const bookingsThunkReducer = bookingsThunk.reducer;
 export const bookingsThunkAction = bookingsThunk.actions;
