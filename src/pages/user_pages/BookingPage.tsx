@@ -1,5 +1,5 @@
 import { Button, DatePicker, message, Modal, Table, type DatePickerProps } from 'antd'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router';
 import type { Bookings } from '../../types/bookings.type';
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,6 +7,9 @@ import type { AppDispatch, StoreType } from '../../stores';
 import { getBookings } from '../../stores/slices/bookings.thunk';
 import type { UserBookings } from '../../types/user_bookings.type';
 import ConvertBookings from './ConvertBookings';
+import type { Course } from '../../types/course.type';
+import { getCourses } from '../../stores/slices/course.thunk';
+import { validateBookingModal } from '../../utils/core/validate.booking_modal';
 
 export default function BookingPage() {
   const navigate = useNavigate();
@@ -14,13 +17,13 @@ export default function BookingPage() {
   const [tableData, setTableData] = useState<UserBookings[]>([]);
   const store = useSelector((state: StoreType) => state.bookingsThunk.data);
   const dispatch = useDispatch<AppDispatch>();
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [dateChosen, setDateChosen] = useState("");
 
   const showModal = () => {
     setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
+    // console.log(dateChosen);
+    // console.log(typeof dateChosen);
   };
 
   const handleCancel = () => {
@@ -66,8 +69,10 @@ export default function BookingPage() {
     },
   ];
 
-  const onChange: DatePickerProps['onChange'] = (date, dateString) => {
-    console.log(date, dateString);
+  const onChange: DatePickerProps['onChange'] = (_, dateString) => {
+    // console.log(dateString);
+    // console.log(typeof dateString);
+    setDateChosen(dateString as string);
   };
 
   useEffect(() => {
@@ -76,6 +81,33 @@ export default function BookingPage() {
       setTimeout(() => { navigate("/signin") }, 500);
     }
   });
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    const userId = localStorage.getItem('currentUserId') || '';
+    const courseName = (e.target as any).course?.value || '';
+    const courseObj = allCourses.find(c => c.name === courseName);
+    const courseId = courseObj ? courseObj.id : '';
+    const bookingDate = dateChosen;
+    const bookingTime = (e.target as any).bookingTime?.value || '';
+
+    const errors = validateBookingModal(
+      { userId, courseId, bookingDate, bookingTime },
+      store // store là bookingsThunk.data
+    );
+    if (errors.length > 0) {
+      message.error(errors.map(e => e.message).join(' '));
+      return;
+    }
+    // khi form đóng thì tự đổi sang option đuầ tiên trong select ?????
+    console.log(courseName);
+    console.log(bookingTime);
+    
+    message.success("Thêm lịch mới thành công!");
+    (e.target as any).reset(); //khong rest form??
+    setIsModalOpen(false);
+    // ...existing logic submit booking...
+  }
 
   useEffect(() => {
     const userId = localStorage.getItem("currentUserId");
@@ -92,12 +124,17 @@ export default function BookingPage() {
           const converted = await ConvertBookings(bookings);
           setTableData(converted);
         }
+
+        const courseAction = await dispatch(getCourses());
+        if (getCourses.fulfilled.match(courseAction)) {
+          setAllCourses(courseAction.payload);
+        }
       } catch (error) {
         message.error((error as any).message);
       }
     };
     fetchData();
-  }, [dispatch, navigate]);
+  }, [store]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -119,17 +156,24 @@ export default function BookingPage() {
             <Modal
               title="Đặt lịch mới"
               open={isModalOpen}
-              onOk={handleOk}
+              onOk={() => {
+                const form = document.getElementById("modalFormAdd") as HTMLFormElement;
+                form?.requestSubmit();
+                // setIsModalOpen(false);
+              }}
+              okText="Lưu"
               onCancel={handleCancel}
+              cancelText="Hủy"
+              cancelButtonProps={{ style: { background: "gray", color: "whitesmoke" } }}
             >
-              <div>
+              <form id='modalFormAdd' onSubmit={(e) => {handleSubmit(e)}}>
                 <div className='my-3'>
                   <label htmlFor="class" className="block mb-1 font-medium text-gray-700">Lớp học</label>
-                  <select id="class" name="class" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option disabled selected>-- Chọn lớp học --</option>
-                    <option value="yoga">Yoga</option>
-                    <option value="cardio">Cardio</option>
-                    <option value="gym">Gym</option>
+                  <select id="course" name="course" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option disabled selected value="">-- Chọn lớp học --</option>
+                    {allCourses && allCourses.map((course) => (
+                      <option key={course.id} value={course.name}>{course.name}</option>
+                    ))}
                   </select>
                 </div>
                 <div className='my-3'>
@@ -138,15 +182,15 @@ export default function BookingPage() {
                   <DatePicker onChange={onChange} className='w-full' style={{border: "1px solid black"}} />
                 </div>
                 <div className='my-3'>
-                  <label htmlFor="timeSlot" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
-                  <select id="timeSlot" name="timeSlot" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option disabled selected>-- Chọn khung giờ --</option>
+                  <label htmlFor="bookingTime" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
+                  <select id="bookingTime" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option disabled selected value="">-- Chọn khung giờ --</option>
                     <option value="07:00 - 09:00">Sáng (07:00 - 09:00)</option>
                     <option value="14:00 - 16:00">Chiều (14:00 - 16:00)</option>
                     <option value="18:00 - 20:00">Tối (18:00 - 20:00)</option>
                   </select>
                 </div>
-              </div>
+              </form>
 
             </Modal>
           </div>
