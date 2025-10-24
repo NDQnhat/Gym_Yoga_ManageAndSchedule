@@ -38,6 +38,7 @@ export const bookingsThunk = createSlice({
         .addCase(makeNewBookings.fulfilled, (state, action) => {
             state.loading = false;
             // state.data.push(action.payload);
+            state.data = action.payload;
         })
         .addCase(makeNewBookings.rejected, (state) => {
             state.loading = false;

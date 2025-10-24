@@ -6,10 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 export const BookingsApi = {
   getUserBookings: async (id: string, currentPage: number, perPage: number) => {
     try {
-      let result = await axios.get(
-        `${API_URL}/bookings?userId=${id}&_page=${currentPage}&_per_page=${perPage}`
-      );
-      // json-server v1 trả về { data: [...] }, v0.17 trả về mảng trực tiếp
+      const result = await axios.get(`${API_URL}/bookings?userId=${id}&_page=${currentPage}&_per_page=${perPage}`);
       if (Array.isArray(result.data)) {
         return result.data;
       } else if (result.data && Array.isArray(result.data.data)) {
