@@ -55,7 +55,7 @@ export const BookingsApi = {
       };
     }
   },
-  removeBooking: async (id: string) => {
+  removeBookings: async (id: string) => {
     try {
       let result = await axios.delete(`${API_URL}/bookings/${id}`);
       // console.log(result); result.data la` object chua' du~ lieu. vua` xoa'
@@ -64,5 +64,6 @@ export const BookingsApi = {
         message: "Fail to delete booking!!", error,
       }
     }
-  }
+  },
+  updateBookings: async(id: string) => {}
 };

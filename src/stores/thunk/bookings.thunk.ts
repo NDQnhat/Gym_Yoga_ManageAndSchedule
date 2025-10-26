@@ -66,7 +66,7 @@ export const makeNewBookings = createAsyncThunk("postNewBookings", async (data: 
 });
 
 export const deleteBookings = createAsyncThunk("bookings/delete", async (id: string) => {
-    await apis.bookingsApi.removeBooking(id);
+    await apis.bookingsApi.removeBookings(id);
 });
 
 export const bookingsThunkReducer = bookingsThunk.reducer;

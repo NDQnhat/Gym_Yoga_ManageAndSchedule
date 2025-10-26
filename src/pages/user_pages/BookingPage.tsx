@@ -27,6 +27,7 @@ export default function BookingPage() {
   const [modalType, setModalType] = useState<"add" | "edit">("add");
   const [bookingIdToDelete, setBookingIdToDelete] = useState<string>("");
   const [bookings, setBookings] = useState<Bookings[]>([]);
+  // const [currentEdit, setCurrentEdit] = useState<>();
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -34,8 +35,8 @@ export default function BookingPage() {
     // console.log(typeof dateChosen);
   };
 
-  const handleCancel = (type?: 'add' | 'delete') => {
-    if (type === 'add') setIsModalOpen(false);
+  const handleCancel = (type?: 'add/edit' | 'delete') => {
+    if (type === 'add/edit') setIsModalOpen(false);
     if (type === 'delete') setConfirmToDel(false);
   };
 
@@ -72,7 +73,10 @@ export default function BookingPage() {
       /*render: (value, record, index) => ( Renderer of the table cell. value is the value of current cell; record is the value object of current row; index is the row number. The return value should be a ReactNode */
       render: (_: any, record: UserBookings) => (
         <div className="flex gap-2">
-          <Button type="link" className="p-0">Sửa</Button>
+          <Button type="link" className="p-0" onClick={() => {
+            setModalType("edit");
+            setIsModalOpen(true);
+          }}>Sửa</Button>
           <Button type="link" onClick={() => {
             setConfirmToDel(true);
             setBookingIdToDelete(record.bookingId);
@@ -215,7 +219,7 @@ export default function BookingPage() {
             </Button>
             <Modal
               key={isModalOpen ? 'open' : 'closed'} // isModalOpen thay doi? -> key cua? modal thya doi? theo -> unmount va` reumount tu` dau`
-              title={modalType === "add" ? "Đặt lịch mới" : "Chỉnh sửa lịch"}
+              title={modalType === "add" ? "Đặt lịch mới" : "Chỉnh sửa lịch đặt"}
               open={isModalOpen}
               onOk={() => {
                 const form = document.getElementById("modalFormAdd") as HTMLFormElement;
@@ -223,34 +227,53 @@ export default function BookingPage() {
                 // setIsModalOpen(false);
               }}
               okText="Lưu"
-              onCancel={() => handleCancel("add")}
+              onCancel={() => handleCancel("add/edit")}
               cancelText="Hủy"
               cancelButtonProps={{ style: { background: "gray", color: "whitesmoke" } }}
             >
-              <form id='modalFormAdd' onSubmit={(e) => { handleSubmit(e) }}>
-                <div className='my-3'>
-                  <label htmlFor="class" className="block mb-1 font-medium text-gray-700">Lớp học</label>
-                  <select id="course" defaultValue="" name="course" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option disabled value="">-- Chọn lớp học --</option>
-                    {allCourses && allCourses.map((course) => (
-                      <option key={course.id} value={course.name}>{course.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className='my-3'>
-                  <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
-                  <DatePicker onChange={onChange} className='w-full' style={{ border: "1px solid black" }} />
-                </div>
-                <div className='my-3'>
-                  <label htmlFor="bookingTime" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
-                  <select id="bookingTime" defaultValue="" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option disabled value="">-- Chọn khung giờ --</option>
-                    <option value="07:00 - 09:00">Sáng (07:00 - 09:00)</option>
-                    <option value="14:00 - 16:00">Chiều (14:00 - 16:00)</option>
-                    <option value="18:00 - 20:00">Tối (18:00 - 20:00)</option>
-                  </select>
-                </div>
-              </form>
+              {
+                modalType === "add" ?
+                  <form id='modalFormAdd' onSubmit={(e) => { handleSubmit(e) }}>
+                    <div className='my-3'>
+                      <label htmlFor="class" className="block mb-1 font-medium text-gray-700">Lớp học</label>
+                      <select id="course" defaultValue="" name="course" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option disabled value="">-- Chọn lớp học --</option>
+                        {allCourses && allCourses.map((course) => (
+                          <option key={course.id} value={course.name}>{course.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className='my-3'>
+                      <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
+                      <DatePicker onChange={onChange} className='w-full' style={{ border: "1px solid black" }} />
+                    </div>
+                    <div className='my-3'>
+                      <label htmlFor="bookingTime" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
+                      <select id="bookingTime" defaultValue="" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option disabled value="">-- Chọn khung giờ --</option>
+                        <option value="07:00 - 09:00">Sáng (07:00 - 09:00)</option>
+                        <option value="14:00 - 16:00">Chiều (14:00 - 16:00)</option>
+                        <option value="18:00 - 20:00">Tối (18:00 - 20:00)</option>
+                      </select>
+                    </div>
+                  </form>
+
+                  : <form id='modalFormAdd' onSubmit={(e) => { handleSubmit(e) }}>
+                    <div className='my-3'>
+                      <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
+                      <DatePicker onChange={onChange} className='w-full' style={{ border: "1px solid black" }} />
+                    </div>
+                    <div className='my-3'>
+                      <label htmlFor="bookingTime" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
+                      <select id="bookingTime" defaultValue="" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option disabled value="">-- Chọn khung giờ --</option>
+                        <option value="07:00 - 09:00">Sáng (07:00 - 09:00)</option>
+                        <option value="14:00 - 16:00">Chiều (14:00 - 16:00)</option>
+                        <option value="18:00 - 20:00">Tối (18:00 - 20:00)</option>
+                      </select>
+                    </div>
+                  </form>
+              }
 
             </Modal>
           </div>
