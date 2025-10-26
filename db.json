@@ -61,14 +61,6 @@
   ],
   "bookings": [
     {
-      "id": "503",
-      "userId": "237a",
-      "courseId": "201",
-      "bookingDate": "2025-10-07",
-      "bookingTime": "07:00 - 09:00",
-      "status": "confirmed"
-    },
-    {
       "id": "504",
       "userId": "2",
       "courseId": "202",
@@ -83,14 +75,6 @@
       "status": "confirmed",
       "bookingTime": "07:00 - 09:00",
       "bookingDate": "2025-10-10"
-    },
-    {
-      "id": "0d55",
-      "userId": "237a",
-      "courseId": "202",
-      "status": "confirmed",
-      "bookingTime": "18:00 - 20:00",
-      "bookingDate": "2025-10-15"
     },
     {
       "id": "1008",

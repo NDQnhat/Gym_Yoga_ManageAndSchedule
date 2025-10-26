@@ -1,7 +1,7 @@
 import type { FormSignin } from "../../auth/Login";
 import type { ErrorType, FormSignup } from "../../auth/Register";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:888';
 
 export const validation = {
   signup: (data: FormSignup) => {

@@ -4,11 +4,11 @@ import { useNavigate } from 'react-router';
 import type { Bookings } from '../../types/bookings.type';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, StoreType } from '../../stores';
-import { getBookings, makeNewBookings } from '../../stores/slices/bookings.thunk';
+import { deleteBookings, getBookings, makeNewBookings } from '../../stores/thunk/bookings.thunk';
 import type { UserBookings } from '../../types/user_bookings.type';
 import ConvertBookings from './ConvertBookings';
 import type { Course } from '../../types/course.type';
-import { getCourses } from '../../stores/slices/course.thunk';
+import { getCourses } from '../../stores/thunk/course.thunk';
 import { validateBookingModal } from '../../utils/core/validate.booking_modal';
 import { apis } from '../../apis';
 
@@ -22,8 +22,11 @@ export default function BookingPage() {
   const [dateChosen, setDateChosen] = useState("");
   const [confirmToDel, setConfirmToDel] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage, setPerPage] = useState(5);
+  const [perPage] = useState(5);
   const [bookingsQuantity, setBookingsQuantity] = useState(0);
+  const [modalType, setModalType] = useState<"add" | "edit">("add");
+  const [bookingIdToDelete, setBookingIdToDelete] = useState<string>("");
+  const [bookings, setBookings] = useState<Bookings[]>([]);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -66,10 +69,15 @@ export default function BookingPage() {
       title: 'Thao tác',
       dataIndex: 'action',
       key: 'action',
-      render: () => (
+      /*render: (value, record, index) => ( Renderer of the table cell. value is the value of current cell; record is the value object of current row; index is the row number. The return value should be a ReactNode */
+      render: (_: any, record: UserBookings) => (
         <div className="flex gap-2">
           <Button type="link" className="p-0">Sửa</Button>
-          <Button type="link" onClick={() => setConfirmToDel(true)} danger className="p-0">Xóa</Button>
+          <Button type="link" onClick={() => {
+            setConfirmToDel(true);
+            setBookingIdToDelete(record.bookingId);
+            // console.log("record del: ", record);
+          }} danger className="p-0">Xóa</Button>
           {/* <Popconfirm
             title="Delete the bookings"
             description="Are you sure to delete this bookings?"
@@ -107,7 +115,7 @@ export default function BookingPage() {
     const bookingDate = dateChosen;
     const bookingTime = (e.target as any).bookingTime?.value || '';
 
-    // Fetch toàn bộ bookings của user để kiểm tra trùng lặp
+    // Fetch toan` bo. booking cua user de? kiem? tra trung` lap.
     let allUserBookings: Bookings[] = [];
     try {
       const res = await apis.bookingsApi.getAll(userId);
@@ -168,7 +176,8 @@ export default function BookingPage() {
         const quantity = await apis.bookingsApi.getUserBookingsQuantity(userId);
         setBookingsQuantity(quantity);
         if (getBookings.fulfilled.match(action)) {
-          const bookings = action.payload;
+          // const bookings = action.payload;
+          setBookings(action.payload);
           const converted = await ConvertBookings(bookings);
           setTableData(converted);
         } else {
@@ -185,7 +194,7 @@ export default function BookingPage() {
       }
     };
     fetchData();
-  }, [currentPage, perPage]);
+  }, [currentPage, perPage, bookings]);
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -206,7 +215,7 @@ export default function BookingPage() {
             </Button>
             <Modal
               key={isModalOpen ? 'open' : 'closed'} // isModalOpen thay doi? -> key cua? modal thya doi? theo -> unmount va` reumount tu` dau`
-              title="Đặt lịch mới"
+              title={modalType === "add" ? "Đặt lịch mới" : "Chỉnh sửa lịch"}
               open={isModalOpen}
               onOk={() => {
                 const form = document.getElementById("modalFormAdd") as HTMLFormElement;
@@ -230,7 +239,6 @@ export default function BookingPage() {
                 </div>
                 <div className='my-3'>
                   <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
-                  {/* <input type="date" id="date" name="date" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" /> */}
                   <DatePicker onChange={onChange} className='w-full' style={{ border: "1px solid black" }} />
                 </div>
                 <div className='my-3'>
@@ -252,7 +260,6 @@ export default function BookingPage() {
               columns={columns}
               dataSource={tableData}
               pagination={false}
-              // locale={{ emptyText: 'Không có dữ liệu' }}
               locale={{
                 emptyText: <Empty description="Bạn chưa co lịch tập nào!!" />,
               }}
@@ -262,7 +269,24 @@ export default function BookingPage() {
             <Modal
               title="Bạn có xác nhận muốn xóa lịch đặt này?"
               open={confirmToDel}
-              onOk={() => setConfirmToDel(false)}
+              onOk={async () => {
+                if (bookingIdToDelete) {
+                  try {
+                    await dispatch(deleteBookings(bookingIdToDelete));
+                    message.success("Delete successfully!");
+                    setConfirmToDel(false);
+                    // Cho load lai. du~ lieu. table
+                    const userId = localStorage.getItem("currentUserId") || "";
+                    const action = await dispatch(getBookings({ id: userId, currentPage, perPage }));
+                    if (getBookings.fulfilled.match(action)) {
+                      const converted = await ConvertBookings(action.payload);
+                      setTableData(converted);
+                    }
+                  } catch (error) {
+                    message.error((error as any).message);
+                  }
+                }
+              }}
               okText="Xóa"
               okButtonProps={{ style: { background: "#f5222d", color: "whitesmoke" } }}
               onCancel={() => handleCancel("delete")}
@@ -271,7 +295,7 @@ export default function BookingPage() {
             ></Modal>
           </div>
         </div>
-      </main>
-    </div>
+      </main >
+    </div >
   )
 }

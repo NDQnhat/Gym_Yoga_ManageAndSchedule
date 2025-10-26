@@ -43,6 +43,15 @@ export const bookingsThunk = createSlice({
         .addCase(makeNewBookings.rejected, (state) => {
             state.loading = false;
         })
+        .addCase(deleteBookings.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(deleteBookings.fulfilled, (state) => {
+            state.loading = false;
+        })
+        .addCase(deleteBookings.rejected, (state) => {
+            state.loading = false;
+        })
     }
 });
 
@@ -56,7 +65,9 @@ export const makeNewBookings = createAsyncThunk("postNewBookings", async (data: 
     return res;
 });
 
-export const deleteBookings = createAsyncThunk("bookings/delete", async () => {});
+export const deleteBookings = createAsyncThunk("bookings/delete", async (id: string) => {
+    await apis.bookingsApi.removeBooking(id);
+});
 
 export const bookingsThunkReducer = bookingsThunk.reducer;
 export const bookingsThunkAction = bookingsThunk.actions;

@@ -3,7 +3,7 @@ import Card from "../../components/Card"
 import { useNavigate } from 'react-router'
 import Footer from '../../components/Footer'
 import Header from '../../components/Header'
-import { getCourses } from '../../stores/slices/course.thunk'
+import { getCourses } from '../../stores/thunk/course.thunk'
 import type { Course } from '../../types/course.type'
 // import { message } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
@@ -11,7 +11,6 @@ import type { AppDispatch, StoreType } from '../../stores'
 
 export default function Home() {
     const navigate = useNavigate();
-    // Không cần state cục bộ courses nữa
     const dispatch = useDispatch<AppDispatch>();
     const { data, loading, error } = useSelector((state: StoreType) => state.courseThunk);
 

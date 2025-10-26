@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Bookings } from "../../types/bookings.type";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:888';
 
 export const BookingsApi = {
   getUserBookings: async (id: string, currentPage: number, perPage: number) => {
@@ -55,4 +55,14 @@ export const BookingsApi = {
       };
     }
   },
+  removeBooking: async (id: string) => {
+    try {
+      let result = await axios.delete(`${API_URL}/bookings/${id}`);
+      // console.log(result); result.data la` object chua' du~ lieu. vua` xoa'
+    } catch (error) {
+      throw {
+        message: "Fail to delete booking!!", error,
+      }
+    }
+  }
 };

@@ -4,4 +4,5 @@ export interface UserBookings {
     bookingTime: string,
     fullname: string,
     email: string,
+    bookingId: string,  //khong co' no' la` khong xoa' duoc. nen phai? bo? sung them
 }

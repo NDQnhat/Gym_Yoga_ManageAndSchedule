@@ -1,8 +1,8 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import { userThunkReducer } from "./slices/user.thunk";
+import { userThunkReducer } from "./thunk/user.thunk";
 import { userReducer } from "./slices/user.slice";
-import { courseThunkReducer } from "./slices/course.thunk";
-import { bookingsThunkReducer } from "./slices/bookings.thunk";
+import { courseThunkReducer } from "./thunk/course.thunk";
+import { bookingsThunkReducer } from "./thunk/bookings.thunk";
 
 const RootReducer = combineReducers({
     userThunk: userThunkReducer,

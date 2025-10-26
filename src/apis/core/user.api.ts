@@ -11,7 +11,7 @@ import { message } from "antd";
 //   role?: string;
 // }
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:888';
 
 export const UserApi = {
   registerUser: async (data: FormSignup) => {

@@ -6,7 +6,7 @@ import { validation } from '../utils/core/validation';
 // import { apis } from '../apis';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, StoreType } from '../stores';
-import { postUser } from '../stores/slices/user.thunk';
+import { postUser } from '../stores/thunk/user.thunk';
 
 export interface FormSignup {
     fullname: string,
@@ -79,7 +79,7 @@ export default function Register() {
                 navigate("/");
             }, 1000);
         }
-    });
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">

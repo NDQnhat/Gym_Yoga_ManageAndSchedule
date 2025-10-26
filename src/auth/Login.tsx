@@ -4,7 +4,7 @@ import { validation } from '../utils/core/validation';
 // import { apis } from '../apis';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, StoreType } from '../stores';
-import { checkSigninData } from '../stores/slices/user.thunk';
+import { checkSigninData } from '../stores/thunk/user.thunk';
 import { message } from 'antd';
 import { userAction } from '../stores/slices/user.slice';
 
