@@ -67,7 +67,7 @@ export const BookingsApi = {
   },
   updateBookings: async(id: string, newData: Bookings) => {
     try {
-      await axios.patch(`${API_URL}/${id}`, newData);
+      await axios.patch(`${API_URL}/bookings/${id}`, newData);
     } catch (error) {
       throw {
         message: "Fail to update booking!!", error,

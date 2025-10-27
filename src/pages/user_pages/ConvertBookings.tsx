@@ -19,6 +19,7 @@ export default async function ConvertBookings(bookings: Bookings[]): Promise<Use
                 fullname,
                 email,
                 bookingId: booking.id as string,
+                courseId: booking.courseId,
             };
         })
     );

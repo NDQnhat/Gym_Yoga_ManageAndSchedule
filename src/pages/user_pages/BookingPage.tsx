@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router';
 import type { Bookings } from '../../types/bookings.type';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, StoreType } from '../../stores';
-import { deleteBookings, getBookings, makeNewBookings } from '../../stores/thunk/bookings.thunk';
+import { deleteBookings, getBookings, makeNewBookings, updateBookings } from '../../stores/thunk/bookings.thunk';
 import type { UserBookings } from '../../types/user_bookings.type';
 import ConvertBookings from './ConvertBookings';
 import type { Course } from '../../types/course.type';
@@ -34,6 +34,7 @@ export default function BookingPage() {
   const [bookingIdToDelete, setBookingIdToDelete] = useState<string>("");
   const [bookings, setBookings] = useState<Bookings[]>([]);
   const [currentDataEdit, setCurrentDataEdit] = useState<DataEditType | null>(null);
+  const [dataToUpdate, setDataToUpdate] = useState<Bookings>({ userId: "", status: "confirmed", courseId: "", bookingTime: "", bookingDate: "" });
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -82,6 +83,14 @@ export default function BookingPage() {
           <Button type="link" className="p-0" onClick={() => {
             // console.log("record: ", record);
             setCurrentDataEdit({ bookingDate: record.bookingDate, bookingTime: record.bookingTime });
+            setDataToUpdate({
+              id: record.bookingId,
+              userId: localStorage.getItem("currentUserId") as string,
+              status: "confirmed",
+              courseId: record.courseId,
+              bookingTime: record.bookingTime, //2 cai' nay` se~ update sau khi confirm ok
+              bookingDate: record.bookingDate,
+            });
             setModalType("edit");
             setIsModalOpen(true);
           }}>Sửa</Button>
@@ -167,6 +176,35 @@ export default function BookingPage() {
 
   const handleEditSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    // setDataToUpdate((prev) => ({
+    //   ...prev,
+    //   bookingDate: dateChosen,
+    //   bookingTime: (e.target as any).bookingTime?.value || ''
+    // })); dâtToUpdate la` bat' dong` bo. nen du~ lieu. van~ la` cu~
+
+    const bookingDate = dateChosen;
+    const bookingTime = (e.target as any).bookingTime?.value || '';
+    const updatedData = {
+      ...dataToUpdate,
+      bookingDate,
+      bookingTime,
+    };
+
+    try {
+      console.log(dataToUpdate);
+      await dispatch(updateBookings({ id: updatedData.id as string, newData: updatedData }));
+      message.success("Update successfully!");
+      setIsModalOpen(false);
+      // Cho load lai. du~ lieu. table
+      const userId = localStorage.getItem("currentUserId") || "";
+      const action = await dispatch(getBookings({ id: userId, currentPage, perPage }));
+      if (getBookings.fulfilled.match(action)) {
+        const converted = await ConvertBookings(action.payload);
+        setTableData(converted);
+      }
+    } catch (error) {
+      message.error((error as any).message);
+    }
   }
 
   useEffect(() => {
