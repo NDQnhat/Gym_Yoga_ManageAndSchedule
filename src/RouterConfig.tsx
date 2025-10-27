@@ -4,7 +4,10 @@ import Login from './auth/Login'
 import Register from './auth/Register'
 import Home from './pages/home_pages/Home'
 import BookingPage from './pages/user_pages/BookingPage'
-import Dashboard from './pages/admin_pages/Dashboard'
+import AdminLayout from './pages/admin_pages/AdminLayout'
+import ServicesManagement from './pages/admin_pages/ServicesManagement'
+import Statistical from './pages/admin_pages/Statistical'
+import ProtectAdmin from './ProtectAdmin'
 
 export default function RouterConfig() {
   return (
@@ -13,7 +16,10 @@ export default function RouterConfig() {
       <Route path='/signup' element={<Register />} />
       <Route path='/' element={<Home />} />
       <Route path='/booking' element={<BookingPage />} />
-      <Route path='/admin' element={<Dashboard />} />
+      <Route path='/admin' element={<ProtectAdmin><AdminLayout /></ProtectAdmin>} >
+        <Route index element={<Statistical />} />
+        <Route path='services' element={<ServicesManagement />} />
+      </Route>
     </Routes>
   )
 }

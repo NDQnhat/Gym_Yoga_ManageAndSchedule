@@ -52,6 +52,16 @@ export const bookingsThunk = createSlice({
         .addCase(deleteBookings.rejected, (state) => {
             state.loading = false;
         })
+        .addCase(updateBookings.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(updateBookings.fulfilled, (state) => {
+            state.loading = false;
+        })
+        .addCase(updateBookings.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.error.message || "Fail to update!!";
+        })
     }
 });
 
@@ -67,6 +77,10 @@ export const makeNewBookings = createAsyncThunk("postNewBookings", async (data: 
 
 export const deleteBookings = createAsyncThunk("bookings/delete", async (id: string) => {
     await apis.bookingsApi.removeBookings(id);
+});
+
+export const updateBookings = createAsyncThunk<void, {id: string, newData: Bookings}>("bookings/patch", async ({id, newData}) => {
+    await apis.bookingsApi.updateBookings(id, newData);
 });
 
 export const bookingsThunkReducer = bookingsThunk.reducer;

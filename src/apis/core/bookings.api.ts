@@ -57,7 +57,7 @@ export const BookingsApi = {
   },
   removeBookings: async (id: string) => {
     try {
-      let result = await axios.delete(`${API_URL}/bookings/${id}`);
+      await axios.delete(`${API_URL}/bookings/${id}`);
       // console.log(result); result.data la` object chua' du~ lieu. vua` xoa'
     } catch (error) {
       throw {
@@ -65,5 +65,13 @@ export const BookingsApi = {
       }
     }
   },
-  updateBookings: async(id: string) => {}
+  updateBookings: async(id: string, newData: Bookings) => {
+    try {
+      await axios.patch(`${API_URL}/${id}`, newData);
+    } catch (error) {
+      throw {
+        message: "Fail to update booking!!", error,
+      }
+    }
+  }
 };
