@@ -11,6 +11,12 @@ import type { Course } from '../../types/course.type';
 import { getCourses } from '../../stores/thunk/course.thunk';
 import { validateBookingModal } from '../../utils/core/validate.booking_modal';
 import { apis } from '../../apis';
+import dayjs from 'dayjs';
+
+interface DataEditType {
+  bookingDate: string,
+  bookingTime: string,
+}
 
 export default function BookingPage() {
   const navigate = useNavigate();
@@ -27,7 +33,7 @@ export default function BookingPage() {
   const [modalType, setModalType] = useState<"add" | "edit">("add");
   const [bookingIdToDelete, setBookingIdToDelete] = useState<string>("");
   const [bookings, setBookings] = useState<Bookings[]>([]);
-  // const [currentEdit, setCurrentEdit] = useState<>();
+  const [currentDataEdit, setCurrentDataEdit] = useState<DataEditType | null>(null);
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -74,6 +80,8 @@ export default function BookingPage() {
       render: (_: any, record: UserBookings) => (
         <div className="flex gap-2">
           <Button type="link" className="p-0" onClick={() => {
+            // console.log("record: ", record);
+            setCurrentDataEdit({ bookingDate: record.bookingDate, bookingTime: record.bookingTime });
             setModalType("edit");
             setIsModalOpen(true);
           }}>Sửa</Button>
@@ -82,16 +90,6 @@ export default function BookingPage() {
             setBookingIdToDelete(record.bookingId);
             // console.log("record del: ", record);
           }} danger className="p-0">Xóa</Button>
-          {/* <Popconfirm
-            title="Delete the bookings"
-            description="Are you sure to delete this bookings?"
-            // onConfirm={confirm}
-            // onCancel={cancel}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button type="link" danger className="p-0">Xóa</Button>
-          </Popconfirm> */}
         </div>
       ),
     },
@@ -167,6 +165,10 @@ export default function BookingPage() {
     setCurrentPage(page);
   };
 
+  const handleEditSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+  }
+
   useEffect(() => {
     const userId = localStorage.getItem("currentUserId");
     if (!userId) {
@@ -214,7 +216,10 @@ export default function BookingPage() {
         <div className="px-4">
           <div className="pb-7 flex justify-between items-center">
             <h2 className="text-[30px] font-semibold">Quản lý lịch tập</h2>
-            <Button type="primary" size="large" onClick={showModal}>
+            <Button type="primary" size="large" onClick={() => {
+              setModalType('add');
+              showModal()
+            }}>
               Đặt lịch mới
             </Button>
             <Modal
@@ -222,9 +227,17 @@ export default function BookingPage() {
               title={modalType === "add" ? "Đặt lịch mới" : "Chỉnh sửa lịch đặt"}
               open={isModalOpen}
               onOk={() => {
-                const form = document.getElementById("modalFormAdd") as HTMLFormElement;
-                form?.requestSubmit();
-                // setIsModalOpen(false);
+                if (modalType === "add") {
+                  const form = document.getElementById("modalFormAdd") as HTMLFormElement;
+                  form?.requestSubmit();
+                  return;
+                }
+
+                if (modalType === "edit") {
+                  const form = document.getElementById("modalFormEdit") as HTMLFormElement;
+                  form?.requestSubmit();
+                  return;
+                }
               }}
               okText="Lưu"
               onCancel={() => handleCancel("add/edit")}
@@ -258,14 +271,14 @@ export default function BookingPage() {
                     </div>
                   </form>
 
-                  : <form id='modalFormAdd' onSubmit={(e) => { handleSubmit(e) }}>
+                  : <form id='modalFormEdit' onSubmit={(e) => { handleEditSubmit(e) }}>
                     <div className='my-3'>
                       <label htmlFor="date" className="block mb-1 font-medium text-gray-700">Ngày tập</label>
-                      <DatePicker onChange={onChange} className='w-full' style={{ border: "1px solid black" }} />
+                      <DatePicker onChange={onChange} defaultValue={currentDataEdit?.bookingDate ? dayjs(currentDataEdit.bookingDate) : undefined} className='w-full' style={{ border: "1px solid black" }} />
                     </div>
                     <div className='my-3'>
                       <label htmlFor="bookingTime" className="block mb-1 font-medium text-gray-700">Khung giờ</label>
-                      <select id="bookingTime" defaultValue="" name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      <select id="bookingTime" defaultValue={currentDataEdit?.bookingTime} name="bookingTime" className="w-full border rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option disabled value="">-- Chọn khung giờ --</option>
                         <option value="07:00 - 09:00">Sáng (07:00 - 09:00)</option>
                         <option value="14:00 - 16:00">Chiều (14:00 - 16:00)</option>
