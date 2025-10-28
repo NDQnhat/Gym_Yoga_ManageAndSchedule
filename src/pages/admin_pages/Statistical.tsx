@@ -104,16 +104,14 @@ export default function Statistical() {
                 const quantity = await apis.bookingsApi.getAllUsersBookingsQuantity();
                 setBookingsQuantity(quantity);
                 if (getAllUsersBookingsPaginate.fulfilled.match(action)) {
-                    console.log("action", action);
-                    console.log(action.payload);
-
-                    const temp = action.payload;
-                    console.log("temp:",temp);
+                    // console.log("action", action);
+                    // console.log(action.payload);
+                    const temp: any = action.payload;
+                    // console.log("temp:", temp);
                     setBookings(temp.data);
                     // setBookings(action.payload.data.data);
-                    console.log(bookings);
                     
-                    const converted = await ConvertBookings(bookings);
+                    const converted = await ConvertBookings(temp.data);
                     setTableData(converted);
                 } else {
                     setTableData([]);
@@ -129,7 +127,11 @@ export default function Statistical() {
             }
         };
         fetchData();
-    }, []);
+    }, [perPage, currentPage]);
+
+    useEffect(() => {
+        console.log("bookings", bookings);// setBooking la` bat' dong` bo. nen useefect tren khong doi. gia tri. cua? booking sau khi set duo.
+    }, [bookings]);
 
     return (
         <div className="p-6">

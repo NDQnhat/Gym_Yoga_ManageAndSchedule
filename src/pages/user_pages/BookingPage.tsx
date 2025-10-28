@@ -220,9 +220,9 @@ export default function BookingPage() {
         const quantity = await apis.bookingsApi.getUserBookingsQuantity(userId);
         setBookingsQuantity(quantity);
         if (getBookings.fulfilled.match(action)) {
-          // const bookings = action.payload;
-          setBookings(action.payload);
-          const converted = await ConvertBookings(bookings);
+           setBookings(action.payload);
+          const converted = await ConvertBookings(action.payload);
+          console.log(bookings);
           setTableData(converted);
         } else {
           setTableData([]);
@@ -238,8 +238,11 @@ export default function BookingPage() {
       }
     };
     fetchData();
-  }, [currentPage, perPage, bookings]);
+  }, [currentPage, perPage]);
 
+  useEffect(() => {
+    console.log("bookings", bookings);
+  }, [bookings]);
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-slate-800 text-white lg:px-20 md:px-8 py-4 flex justify-between items-center">
