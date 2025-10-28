@@ -24,5 +24,7 @@ export const CourseApi = {
         message: "Fail to get course with id: " + id,
       }
     }
-  }
+  },
+
+  queryCourses: async (id: string) => {}
 };

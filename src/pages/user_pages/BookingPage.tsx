@@ -91,6 +91,7 @@ export default function BookingPage() {
               bookingTime: record.bookingTime, //2 cai' nay` se~ update sau khi confirm ok
               bookingDate: record.bookingDate,
             });
+            setDateChosen(record.bookingDate);
             setModalType("edit");
             setIsModalOpen(true);
           }}>Sửa</Button>
@@ -117,6 +118,28 @@ export default function BookingPage() {
     }
   });
 
+  const checkExistance = async (userId: string, courseId: string, bookingDate: string, bookingTime: string) => {
+    // Fetch toan` bo. booking cua user de? kiem? tra trung` lap.
+    let allUserBookings: Bookings[] = [];
+    try {
+      const res = await apis.bookingsApi.getAll(userId);
+      allUserBookings = res;
+    } catch (err) {
+      message.error("Không thể kiểm tra trùng lặp lịch tập!");
+      return false;
+    }
+
+    const errors = validateBookingModal(
+      { userId, courseId, bookingDate, bookingTime },
+      allUserBookings
+    );
+    if (errors.length > 0) {
+      message.error(errors.map(e => e.message).join(' '));
+      return false;
+    }
+    return true;
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     const userId = localStorage.getItem('currentUserId') || '';
@@ -126,24 +149,8 @@ export default function BookingPage() {
     const bookingDate = dateChosen;
     const bookingTime = (e.target as any).bookingTime?.value || '';
 
-    // Fetch toan` bo. booking cua user de? kiem? tra trung` lap.
-    let allUserBookings: Bookings[] = [];
-    try {
-      const res = await apis.bookingsApi.getAll(userId);
-      allUserBookings = res;
-    } catch (err) {
-      message.error('Không thể kiểm tra trùng lặp lịch tập!');
-      return;
-    }
-
-    const errors = validateBookingModal(
-      { userId, courseId, bookingDate, bookingTime },
-      allUserBookings
-    );
-    if (errors.length > 0) {
-      message.error(errors.map(e => e.message).join(' '));
-      return;
-    }
+    const isValid = await checkExistance(userId, courseId, bookingDate, bookingTime);
+    if (!isValid) return;
 
     const newBookings: Bookings = {
       userId,
@@ -190,13 +197,22 @@ export default function BookingPage() {
       bookingTime,
     };
 
+    if (dataToUpdate.bookingDate === updatedData.bookingDate && dataToUpdate.bookingTime === updatedData.bookingTime) {
+      message.warning("Nothing to change!!");
+      setIsModalOpen(false);
+      return;
+    }
+
+    const userId = localStorage.getItem("currentUserId") || "";
+    const isValid = await checkExistance(userId, updatedData.courseId, bookingDate, bookingTime);
+    if (!isValid) return;
+
     try {
-      console.log(dataToUpdate);
+      // console.log(dataToUpdate);
       await dispatch(updateBookings({ id: updatedData.id as string, newData: updatedData }));
       message.success("Update successfully!");
       setIsModalOpen(false);
       // Cho load lai. du~ lieu. table
-      const userId = localStorage.getItem("currentUserId") || "";
       const action = await dispatch(getBookings({ id: userId, currentPage, perPage }));
       if (getBookings.fulfilled.match(action)) {
         const converted = await ConvertBookings(action.payload);
@@ -220,9 +236,8 @@ export default function BookingPage() {
         const quantity = await apis.bookingsApi.getUserBookingsQuantity(userId);
         setBookingsQuantity(quantity);
         if (getBookings.fulfilled.match(action)) {
-           setBookings(action.payload);
+          setBookings(action.payload);
           const converted = await ConvertBookings(action.payload);
-          console.log(bookings);
           setTableData(converted);
         } else {
           setTableData([]);
@@ -240,9 +255,9 @@ export default function BookingPage() {
     fetchData();
   }, [currentPage, perPage]);
 
-  useEffect(() => {
-    console.log("bookings", bookings);
-  }, [bookings]);
+  // useEffect(() => {
+  //   console.log("bookings", bookings);
+  // }, [bookings]);
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-slate-800 text-white lg:px-20 md:px-8 py-4 flex justify-between items-center">
@@ -340,7 +355,7 @@ export default function BookingPage() {
               locale={{
                 emptyText: <Empty description="Bạn chưa co lịch tập nào!!" />,
               }}
-              rowKey={(record) => record.bookingDate + record.bookingTime + record.email}
+              rowKey={(record) => record.bookingId}
             />
             <Pagination align="end" current={currentPage} pageSize={perPage} total={bookingsQuantity} onChange={onPageChange} style={{ marginTop: "24px" }} />
             <Modal

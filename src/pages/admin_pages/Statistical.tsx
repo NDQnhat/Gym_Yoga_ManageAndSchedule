@@ -1,7 +1,6 @@
-import { Button, Card, Col, DatePicker, Empty, Input, message, Pagination, Row, Select, Table } from 'antd'
+import { Button, Card, Col, DatePicker, Empty, Input, message, Pagination, Row, Select, Table, type DatePickerProps } from 'antd'
 import { Column } from '@ant-design/plots';
 import React, { useEffect, useState } from 'react'
-import { Option } from 'antd/es/mentions';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../stores';
 import { getAllUsersBookingsPaginate } from '../../stores/thunk/bookings.thunk';
@@ -11,16 +10,40 @@ import type { Course } from '../../types/course.type';
 import type { Bookings } from '../../types/bookings.type';
 import ConvertBookings from '../user_pages/ConvertBookings';
 import type { UserBookings } from '../../types/user_bookings.type';
+import dayjs from 'dayjs';
+
+interface SelectOptionType {
+    key: string,
+    value: string,
+    children: string,
+}
 
 export default function Statistical() {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage] = useState(5);
     const [bookingsQuantity, setBookingsQuantity] = useState(0);
-    // const [bookingsQuantity, setBookingsQuantity] = useState<any>(0);
     const dispatch = useDispatch<AppDispatch>();
     const [allCourses, setAllCourses] = useState<Course[]>([]);
-    const [bookings, setBookings] = useState<Bookings[]>([]);
     const [tableData, setTableData] = useState<UserBookings[]>([]);
+    const [dateChosen, setDateChosen] = useState("");
+    const [emailFilter, setEmailFilter] = useState("");
+    const [courseFilter, setCourseFilter] = useState<SelectOptionType>({children: "", key: "", value: ""});
+    const [allConvertData, setAllConvertData] = useState<UserBookings[]>([]);
+
+    // Filter data
+    useEffect(() => {
+        let filtered = allConvertData;
+        if (courseFilter.value && courseFilter.value !== "") {
+            filtered = filtered.filter(item => item.course === courseFilter.value);
+        }
+        if (emailFilter && emailFilter.trim() !== "") {
+            filtered = filtered.filter(item => item.email.toLowerCase().includes(emailFilter.toLowerCase()));
+        }
+        if (dateChosen && dateChosen !== "") {
+            filtered = filtered.filter(item => item.bookingDate === dateChosen);
+        }
+        setTableData(filtered);
+    }, [courseFilter, emailFilter, dateChosen, allConvertData]);
 
     const columns = [
         {
@@ -93,6 +116,22 @@ export default function Statistical() {
         legend: false,
     };
 
+    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+        if (!date) {
+            setDateChosen("");
+            return;
+        }
+        setDateChosen(dateString as string);
+    };
+
+    const onChangeEmail = (e: any) => {
+        setEmailFilter(e.target.value);
+    }
+
+    const onChangeCourseFilter = (value: string, option: any) => {
+        setCourseFilter(option);
+    }
+
     const onPageChange = (page: number) => {
         setCurrentPage(page);
     };
@@ -104,16 +143,11 @@ export default function Statistical() {
                 const quantity = await apis.bookingsApi.getAllUsersBookingsQuantity();
                 setBookingsQuantity(quantity);
                 if (getAllUsersBookingsPaginate.fulfilled.match(action)) {
-                    // console.log("action", action);
-                    // console.log(action.payload);
-                    const temp: any = action.payload;
-                    // console.log("temp:", temp);
-                    setBookings(temp.data);
-                    // setBookings(action.payload.data.data);
-                    
-                    const converted = await ConvertBookings(temp.data);
+                    const converted = await ConvertBookings((action.payload as any).data);
+                    setAllConvertData(converted);
                     setTableData(converted);
                 } else {
+                    setAllConvertData([]);
                     setTableData([]);
                 }
 
@@ -128,10 +162,6 @@ export default function Statistical() {
         };
         fetchData();
     }, [perPage, currentPage]);
-
-    useEffect(() => {
-        console.log("bookings", bookings);// setBooking la` bat' dong` bo. nen useefect tren khong doi. gia tri. cua? booking sau khi set duo.
-    }, [bookings]);
 
     return (
         <div className="p-6">
@@ -161,11 +191,11 @@ export default function Statistical() {
                         <div className="mb-2">
                             <label className="text-sm text-gray-600">Lớp học</label>
                         </div>
-                        <Select placeholder="Tất cả" className="w-full" size="large">
-                            <Option value="">Tất cả</Option>
-                            <Option value="gym">Gym</Option>
-                            <Option value="yoga">Yoga</Option>
-                            <Option value="zumba">Zumba</Option>
+                        <Select placeholder="Tất cả" className="w-full" size="large" onChange={onChangeCourseFilter}>
+                            <Select.Option value="">Tất cả</Select.Option>
+                            {allCourses && allCourses.map(course => {
+                                return <Select.Option key={course.id} value={course.name}>{course.name}</Select.Option>
+                            })}
                         </Select>
                     </Col>
 
@@ -173,14 +203,14 @@ export default function Statistical() {
                         <div className="mb-2">
                             <label className="text-sm text-gray-600">Email</label>
                         </div>
-                        <Input placeholder="Tìm theo email" size="large" className="w-full" />
+                        <Input onChange={onChangeEmail} placeholder="Tìm theo email" size="large" className="w-full" />
                     </Col>
 
                     <Col xs={24} sm={8}>
                         <div className="mb-2">
                             <label className="text-sm text-gray-600">Ngày</label>
                         </div>
-                        <DatePicker placeholder="Chọn ngày" className="w-full" size="large" format="DD/MM/YYYY" />
+                        <DatePicker onChange={onChangeDate} placeholder="Chọn ngày" className="w-full" size="large" /> {/*neu' can` co' the? them format="DD/MM/YY" */}
                     </Col>
                 </Row>
             </div>

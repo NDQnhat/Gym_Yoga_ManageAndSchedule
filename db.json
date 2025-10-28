@@ -57,6 +57,22 @@
       "description": "Tập luyện theo nhạc, đốt cháy năng lượng.",
       "price": 180000,
       "imageUrl": "https://th.bing.com/th/id/OIP.9aI52ZSOsNi90PxoXmi0ggHaE9?w=219&h=180&c=7&r=0&o=7&cb=12&dpr=1.3&pid=1.7&rm=3"
+    },
+    {
+      "id": "203",
+      "name": "Gym Sức Mạnh",
+      "type": "Gym",
+      "description": "Rèn luyện cơ bắp và tăng cường thể lực với các bài tập chuyên sâu.",
+      "price": 200000,
+      "imageUrl": "https://www.bing.com/th/id/OIP.nZZgoWdEmQXj3qE6S_VX7wHaEt?w=228&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2"
+    },
+    {
+      "id": "204",
+      "name": "Yoga Dẻo Dai",
+      "type": "Yoga",
+      "description": "Cải thiện sự linh hoạt, cân bằng và thư giãn tâm trí.",
+      "price": 150000,
+      "imageUrl": "https://www.bing.com/th/id/OIP.OmBkv7PppxKDUYQVaawapAHaEo?w=272&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2"
     }
   ],
   "bookings": [
@@ -105,7 +121,7 @@
       "userId": "237a",
       "courseId": "202",
       "status": "confirmed",
-      "bookingTime": "07:00 - 09:00",
+      "bookingTime": "14:00 - 16:00",
       "bookingDate": "2025-10-02"
     },
     {
@@ -117,24 +133,32 @@
       "bookingDate": "2025-09-28"
     },
     {
-      "id": "771d",
+      "id": "206d",
       "userId": "237a",
       "courseId": "201",
       "status": "confirmed",
-      "bookingTime": "18:00 - 20:00",
-      "bookingDate": "2025-10-31"
+      "bookingTime": "14:00 - 16:00",
+      "bookingDate": "2025-10-16"
     },
     {
-      "id": "3634",
+      "id": "d729",
       "userId": "237a",
       "courseId": "202",
       "status": "confirmed",
-      "bookingTime": "07:00 - 09:00",
-      "bookingDate": "2025-09-29"
+      "bookingTime": "14:00 - 16:00",
+      "bookingDate": "2025-10-16"
     },
     {
-      "id": "6b63",
-      "userId": "237a",
+      "id": "6395",
+      "userId": "1",
+      "courseId": "201",
+      "status": "confirmed",
+      "bookingTime": "14:00 - 16:00",
+      "bookingDate": "2025-10-02"
+    },
+    {
+      "id": "402a",
+      "userId": "1",
       "courseId": "202",
       "status": "confirmed",
       "bookingTime": "18:00 - 20:00",
