@@ -62,6 +62,18 @@ export const bookingsThunk = createSlice({
             state.loading = false;
             state.error = action.error.message || "Fail to update!!";
         })
+        .addCase(getAllUsersBookingsPaginate.pending, (state) => {
+            state.loading = true;
+        })
+        .addCase(getAllUsersBookingsPaginate.fulfilled, (state, action) => {
+            state.loading = false;
+            state.data = action.payload;
+            // console.log(action.payload);
+        })
+        .addCase(getAllUsersBookingsPaginate.rejected, (state, action) => {
+            state.loading = false;
+            state.error = action.error.message as string;
+        })
     }
 });
 
@@ -81,6 +93,11 @@ export const deleteBookings = createAsyncThunk("bookings/delete", async (id: str
 
 export const updateBookings = createAsyncThunk<void, {id: string, newData: Bookings}>("bookings/patch", async ({id, newData}) => {
     await apis.bookingsApi.updateBookings(id, newData);
+});
+
+export const getAllUsersBookingsPaginate = createAsyncThunk<Bookings[], {currentPage: number, perPage: number}>("fetchAllUsersBookingsData", async ({currentPage, perPage}) => {
+    let res = await apis.bookingsApi.getAllWithPagination(currentPage, perPage);
+    return res;
 });
 
 export const bookingsThunkReducer = bookingsThunk.reducer;

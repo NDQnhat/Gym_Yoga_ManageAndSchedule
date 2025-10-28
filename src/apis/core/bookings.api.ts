@@ -73,5 +73,26 @@ export const BookingsApi = {
         message: "Fail to update booking!!", error,
       }
     }
+  },
+  getAllWithPagination: async(currentPage: number, perPage: number) => {
+    try {
+      const result = await axios.get(`${API_URL}/bookings?_page=${currentPage}&_per_page=${perPage}`);
+      return result.data;
+      
+    } catch (error) {
+      throw {
+        message: "Fail to load all Users Bookings" + error,
+      }
+    }
+  },
+  getAllUsersBookingsQuantity: async () => {
+    try {
+      let result = await axios.get(`${API_URL}/bookings`);
+      return result.data.length;
+    } catch (error) {
+      throw {
+        message: "Lỗi khi lấy số lượng: " + error,
+      };
+    }
   }
 };
