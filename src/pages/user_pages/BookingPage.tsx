@@ -233,6 +233,7 @@ export default function BookingPage() {
     const fetchData = async () => {
       try {
         const action = await dispatch(getBookings({ id: userId, currentPage, perPage }));
+        console.log(action);
         const quantity = await apis.bookingsApi.getUserBookingsQuantity(userId);
         setBookingsQuantity(quantity);
         if (getBookings.fulfilled.match(action)) {

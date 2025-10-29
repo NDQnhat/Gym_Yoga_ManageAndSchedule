@@ -21,29 +21,14 @@ interface SelectOptionType {
 export default function Statistical() {
     const [currentPage, setCurrentPage] = useState(1);
     const [perPage] = useState(5);
-    const [bookingsQuantity, setBookingsQuantity] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const dispatch = useDispatch<AppDispatch>();
     const [allCourses, setAllCourses] = useState<Course[]>([]);
     const [tableData, setTableData] = useState<UserBookings[]>([]);
-    const [dateChosen, setDateChosen] = useState("");
+    const [dateFilterChosen, setDateFilterChosen] = useState("");
     const [emailFilter, setEmailFilter] = useState("");
-    const [courseFilter, setCourseFilter] = useState<SelectOptionType>({children: "", key: "", value: ""});
-    const [allConvertData, setAllConvertData] = useState<UserBookings[]>([]);
-
-    // Filter data
-    useEffect(() => {
-        let filtered = allConvertData;
-        if (courseFilter.value && courseFilter.value !== "") {
-            filtered = filtered.filter(item => item.course === courseFilter.value);
-        }
-        if (emailFilter && emailFilter.trim() !== "") {
-            filtered = filtered.filter(item => item.email.toLowerCase().includes(emailFilter.toLowerCase()));
-        }
-        if (dateChosen && dateChosen !== "") {
-            filtered = filtered.filter(item => item.bookingDate === dateChosen);
-        }
-        setTableData(filtered);
-    }, [courseFilter, emailFilter, dateChosen, allConvertData]);
+    const [courseFilter, setCourseFilter] = useState<SelectOptionType>({ children: "", key: "", value: "" });
+    // const [allConvertData, setAllConvertData] = useState<UserBookings[]>([]);
 
     const columns = [
         {
@@ -85,7 +70,7 @@ export default function Statistical() {
         },
     ];
 
-    const statsData = [
+    let statsData = [
         { type: 'Gym', quantity: 1, color: '#2563EB' },
         { type: 'Yoga', quantity: 3, color: '#059669' },
         { type: 'Zumba', quantity: 2, color: '#7C3AED' },
@@ -116,12 +101,12 @@ export default function Statistical() {
         legend: false,
     };
 
-    const onChangeDate: DatePickerProps['onChange'] = (date, dateString) => {
+    const onChangeDateFilter: DatePickerProps['onChange'] = (date, dateString) => {
         if (!date) {
-            setDateChosen("");
+            setDateFilterChosen("");
             return;
         }
-        setDateChosen(dateString as string);
+        setDateFilterChosen(dateString as string);
     };
 
     const onChangeEmail = (e: any) => {
@@ -137,20 +122,18 @@ export default function Statistical() {
     };
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAndFilterData = async () => {
             try {
-                const action = await dispatch(getAllUsersBookingsPaginate({ currentPage, perPage }));
-                const quantity = await apis.bookingsApi.getAllUsersBookingsQuantity();
-                setBookingsQuantity(quantity);
-                if (getAllUsersBookingsPaginate.fulfilled.match(action)) {
-                    const converted = await ConvertBookings((action.payload as any).data);
-                    setAllConvertData(converted);
-                    setTableData(converted);
-                } else {
-                    setAllConvertData([]);
+                const action = await dispatch(getAllUsersBookingsPaginate({ currentPage, perPage, email: emailFilter, course: courseFilter.value, date: dateFilterChosen }));
+                setTotalPages((action.payload as any).items);
+                // console.log((action.payload as any).items);
+                if (!getAllUsersBookingsPaginate.fulfilled.match(action)) {
                     setTableData([]);
+                    return;
                 }
 
+                const converted = await ConvertBookings(((action.payload as any).data) as Bookings[]);
+                setTableData(converted);
                 const courseAction = await dispatch(getCourses());
                 if (getCourses.fulfilled.match(courseAction)) {
                     setAllCourses(courseAction.payload);
@@ -158,10 +141,20 @@ export default function Statistical() {
             } catch (error) {
                 message.error((error as any).message);
                 setTableData([]);
+                setTotalPages(1);
             }
         };
-        fetchData();
-    }, [perPage, currentPage]);
+        fetchAndFilterData();
+
+        console.log(allCourses);
+        
+        // const colorPalette = ["#2563EB", "#059669", "#7C3AED", "#F59E0B", "#DC2626"];
+        // statsData = allCourses.map((course, index) => ({
+        //     type: course.name,
+        //     quantity: index,
+        //     color: colorPalette[index % colorPalette.length],
+        // }))
+    }, [perPage, currentPage, courseFilter, emailFilter, dateFilterChosen]);
 
     return (
         <div className="p-6">
@@ -210,7 +203,7 @@ export default function Statistical() {
                         <div className="mb-2">
                             <label className="text-sm text-gray-600">Ngày</label>
                         </div>
-                        <DatePicker onChange={onChangeDate} placeholder="Chọn ngày" className="w-full" size="large" /> {/*neu' can` co' the? them format="DD/MM/YY" */}
+                        <DatePicker onChange={onChangeDateFilter} placeholder="Chọn ngày" className="w-full" size="large" /> {/*neu' can` co' the? them format="DD/MM/YY" */}
                     </Col>
                 </Row>
             </div>
@@ -224,8 +217,9 @@ export default function Statistical() {
                     locale={{
                         emptyText: <Empty description="Chưa có lịch tập của User nào!!" />,
                     }}
+                    rowKey={(record) => record.bookingId}
                 />
-                <Pagination align="center" current={currentPage} pageSize={perPage} total={bookingsQuantity} onChange={onPageChange} style={{ marginTop: "24px" }} />
+                <Pagination align="center" current={currentPage} pageSize={perPage} total={totalPages} onChange={onPageChange} style={{ marginTop: "24px" }} />
             </div>
         </div>
     )

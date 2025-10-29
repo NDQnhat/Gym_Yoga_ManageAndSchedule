@@ -1,7 +1,6 @@
 import axios from "axios";
 import type { FormSignup } from "../../auth/Register";
 import type { FormSignin } from "../../auth/Login";
-import { message } from "antd";
 
 // export interface UserDTO {
 //   email: string;
@@ -76,4 +75,14 @@ export const UserApi = {
       };
     }
   },
+  getAllUsers: async () => {
+    try {
+      const res = await axios.get(`${API_URL}/users`);
+      return res.data;
+    } catch (error) {
+      throw {
+        message: "Fall to fetch all users data!!",
+      }
+    }
+  }
 };

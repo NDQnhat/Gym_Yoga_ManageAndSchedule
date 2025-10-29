@@ -82,7 +82,7 @@
       "courseId": "202",
       "bookingDate": "2025-10-08",
       "bookingTime": "18:00 - 20:00",
-      "status": "pending"
+      "status": "confirmed"
     },
     {
       "id": "d58a",
