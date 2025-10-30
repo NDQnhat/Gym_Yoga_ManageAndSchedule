@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router'
 
 interface PropsType {
     image: string,
@@ -7,6 +8,7 @@ interface PropsType {
 }
 
 export default function Card({ image, title, description }: PropsType) {
+    const navigate = useNavigate();
     return (
         <div
             className="bg-white rounded-lg shadow-md overflow-hidden 
@@ -29,7 +31,7 @@ export default function Card({ image, title, description }: PropsType) {
             <div className="p-6">
                 <h3 className="text-[20px] md:text-[18px] font-bold mb-2">{title}</h3>
                 <p className="text-gray-600 mb-4 text-[16px] md:text-[14px] pe-[20px]">{description}</p>
-                <button className="bg-blue-600 text-white px-4 py-[8px] rounded hover:bg-blue-700 transition cursor-pointer">
+                <button onClick={() => navigate("/booking")} className="bg-blue-600 text-white px-4 py-[8px] rounded hover:bg-blue-700 transition cursor-pointer">
                     Đặt lịch
                 </button>
             </div>

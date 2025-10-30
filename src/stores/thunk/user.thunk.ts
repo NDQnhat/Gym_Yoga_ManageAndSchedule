@@ -22,15 +22,6 @@ export const userThunk = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // .addCase(fetchUserData.pending, (state) => {
-      //   state.loading = true;
-      // })
-      // .addCase(fetchUserData.fulfilled, (state, action) => {
-      //   state.loading = false;
-      //   // state.user = action.payload;
-      // })
-      // .addCase(fetchUserData.rejected, (state, action) => {
-      // });
       .addCase(postUser.pending, (state) => {
         state.loading = true;
         state.user = null;
@@ -65,6 +56,24 @@ export const userThunk = createSlice({
         state.loading = false;
         state.user = action.payload;
       })
+      .addCase(deleteUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(deleteUser.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(deleteUser.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateUser.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateUser.fulfilled, (state) => {
+        state.loading = false;
+      })
   },
 });
 
@@ -81,6 +90,14 @@ export const postUser = createAsyncThunk("user/postUser", async (data: FormSignu
 export const checkSigninData = createAsyncThunk("users/checkSigninData", async (data: FormSignin) => {
   let result = await apis.userApi.loginUser(data);
   return result;
+});
+
+export const deleteUser = createAsyncThunk("DELETE/users", async (id: string) => {
+  await apis.userApi.removeUser(id);
+}); 
+
+export const updateUser = createAsyncThunk<void, {id: string, newData: User}>("PATCH/courses", async ({id, newData}) => {
+  await apis.userApi.updateUser(id, newData);
 });
 
 export const userThunkReducer = userThunk.reducer;

@@ -1,6 +1,7 @@
 import axios from "axios";
 import type { FormSignup } from "../../auth/Register";
 import type { FormSignin } from "../../auth/Login";
+import type { User } from "../../types/user.type";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:888';
 
@@ -18,7 +19,7 @@ export const UserApi = {
       email: data.email,
       phoneNum: data.phoneNum,
       password: data.password,
-      role: "user",
+      role: data.role || "user",
     });
 
     return res.data;
@@ -76,5 +77,25 @@ export const UserApi = {
         message: "Fall to fetch all users data!!",
       }
     }
-  }
+  },
+
+  removeUser: async (id: string) => {
+    try {
+      await axios.delete(`${API_URL}/users/${id}`);
+    } catch (error) {
+      throw {
+        message: "Fail to delete user!!", error,
+      };
+    }
+  },
+
+  updateUser: async (id: string, newData: User) => {
+    try {
+      let res = await axios.patch(`${API_URL}/users/${id}`, newData);
+    } catch (error) {
+      throw {
+        message: "Fail to update User!!", error,
+      };
+    }
+  },
 };

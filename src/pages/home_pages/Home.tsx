@@ -28,7 +28,7 @@ export default function Home() {
                 <div className="relative text-center text-white z-956">
                     <h2 className="text-[50px] font-bold mb-4">Welcome to Our Gym</h2>
                     <p className="text-xl mb-6 text-[30px]">Transform Your Body, Transform Your Life</p>
-                    <button className="bg-blue-600 text-white ps-[32px] pe-[37px] py-2 rounded-lg hover:bg-blue-700 transition text-lg font-medium cursor-pointer">
+                    <button onClick={() => navigate("/booking")} className="bg-blue-600 text-white ps-[32px] pe-[37px] py-2 rounded-lg hover:bg-blue-700 transition text-lg font-medium cursor-pointer">
                         Bắt đầu ngay
                     </button>
                 </div>

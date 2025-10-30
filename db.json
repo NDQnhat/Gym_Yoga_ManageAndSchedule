@@ -39,6 +39,15 @@
       "phoneNum": "0987654321",
       "password": "12345678",
       "role": "user"
+    },
+    {
+      "id": "4367",
+      "fullname": "Người Dùng 1761833634932",
+      "email": "abc@gmail.com",
+      "phoneNum": "0213919417",
+      "password": "12345678",
+      "role": "user",
+      "phone": "0213919413"
     }
   ],
   "courses": [

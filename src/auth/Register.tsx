@@ -14,6 +14,7 @@ export interface FormSignup {
     phoneNum: string,
     password: string,
     rePass: string,
+    role?: string,
 };
 
 export interface ErrorType {
