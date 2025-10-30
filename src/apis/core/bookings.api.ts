@@ -172,4 +172,15 @@ export const BookingsApi = {
       };
     }
   },
+
+  getCourseBookingQuantity: async (c_id: string) => {
+    try {
+      let result = await axios.get(`${API_URL}/bookings?courseId=${c_id}`);
+      return result.data.length;
+    } catch (error) {
+      throw {
+        message: "Lỗi lấy tổng số lượt đặt",
+      }
+    }
+  }
 };

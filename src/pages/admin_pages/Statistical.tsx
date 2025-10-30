@@ -1,4 +1,4 @@
-import { Button, Card, Col, DatePicker, Empty, Input, message, Pagination, Row, Select, Table, type DatePickerProps } from 'antd'
+import { Button, Card, Col, DatePicker, Empty, Input, message, Pagination, Row, Select, Spin, Table, type DatePickerProps } from 'antd'
 import { Column } from '@ant-design/plots';
 import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
@@ -10,7 +10,7 @@ import type { Course } from '../../types/course.type';
 import type { Bookings } from '../../types/bookings.type';
 import ConvertBookings from '../user_pages/ConvertBookings';
 import type { UserBookings } from '../../types/user_bookings.type';
-import dayjs from 'dayjs';
+import { LoadingOutlined } from '@ant-design/icons';
 
 interface SelectOptionType {
     key: string,
@@ -28,7 +28,9 @@ export default function Statistical() {
     const [dateFilterChosen, setDateFilterChosen] = useState("");
     const [emailFilter, setEmailFilter] = useState("");
     const [courseFilter, setCourseFilter] = useState<SelectOptionType>({ children: "", key: "", value: "" });
-    // const [allConvertData, setAllConvertData] = useState<UserBookings[]>([]);
+    const [statsData, setStatsData] = useState<{ type: string, quantity: number, color: string }[]>([]);
+    const [config, setConfig] = useState({});
+    const [chartLoading, setChartLoading] = useState(false);
 
     const columns = [
         {
@@ -70,37 +72,6 @@ export default function Statistical() {
         },
     ];
 
-    let statsData = [
-        { type: 'Gym', quantity: 1, color: '#2563EB' },
-        { type: 'Yoga', quantity: 3, color: '#059669' },
-        { type: 'Zumba', quantity: 2, color: '#7C3AED' },
-    ];
-
-    const config = {
-        data: statsData,
-        xField: 'type',
-        yField: 'quantity',
-        style: {
-            fill: (datum: any) => {
-                if (datum.type === 'Gym') return '#2563EB';
-                if (datum.type === 'Yoga') return '#059669';
-                if (datum.type === 'Zumba') return '#7C3AED';
-                return '#999';
-            },
-        },
-        markBackground: {
-            style: {
-                fill: '#eee',
-            },
-        },
-        scale: {
-            y: {
-                domain: [0, 3],
-            },
-        },
-        legend: false,
-    };
-
     const onChangeDateFilter: DatePickerProps['onChange'] = (date, dateString) => {
         if (!date) {
             setDateFilterChosen("");
@@ -122,6 +93,91 @@ export default function Statistical() {
     };
 
     useEffect(() => {
+        const loadCourses = async () => {
+            try {
+                const courseAction = await dispatch(getCourses());
+                if (getCourses.fulfilled.match(courseAction)) {
+                    setAllCourses(courseAction.payload);
+                    return;
+                }
+                setAllCourses([]);
+            } catch (error) {
+                setAllCourses([]);
+            }
+        }
+        loadCourses();
+    }, [dispatch]);
+
+    const getRandomRgb = () => {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 256);
+        const b = Math.floor(Math.random() * 256);
+        return `rgba(${r}, ${g}, ${b})`;
+    }
+
+    useEffect(() => {
+        if (!allCourses || allCourses.length === 0) {
+            setStatsData([]);
+            setConfig({});
+            return;
+        }
+
+
+        const buildStats = async () => {
+            setChartLoading(true);
+            try {
+            const results = await Promise.allSettled(
+                allCourses.map((course) => apis.bookingsApi.getCourseBookingQuantity(course.id))
+            );
+            // console.log(results);
+            
+            const data = await Promise.all(
+                allCourses.map(async (course, index) => ({
+                    type: course.name,
+                    // quantity: await apis.bookingsApi.getCourseBookingQuantity(course.id),
+                    quantity: (results[index] as any).status === "fulfilled" ? (results[index] as any).value : 0,
+                    color: getRandomRgb(),
+                }))
+            );
+            setStatsData(data);
+
+            const maxQuantity = Math.max(...data.map(d => d.quantity));
+            
+            const temp = {
+                data,
+                xField: 'type',
+                yField: 'quantity',
+                style: {
+                    fill: (datum: any) => {
+                        const index = data.findIndex(item => item.type === datum.type);
+                        return index !== -1 ? data[index].color : '#999';
+                    },
+                },
+                markBackground: {
+                    style: {
+                        fill: '#eee',
+                    },
+                },
+                scale: {
+                    y: {
+                        domain: [0, Math.max(maxQuantity, 1)], //de? khi chua co' khoa' hoc. nao` duoc. dat. thi` y=1
+                    },
+                },
+                legend: false,
+            }
+            setConfig(temp);
+            }
+            catch (error) {
+                setStatsData([]);
+                setConfig({});
+            } finally {
+            setChartLoading(false);
+            }
+        }
+        buildStats();
+    }, [allCourses]);
+
+    useEffect(() => {
         const fetchAndFilterData = async () => {
             try {
                 const action = await dispatch(getAllUsersBookingsPaginate({ currentPage, perPage, email: emailFilter, course: courseFilter.value, date: dateFilterChosen }));
@@ -134,10 +190,6 @@ export default function Statistical() {
 
                 const converted = await ConvertBookings(((action.payload as any).data) as Bookings[]);
                 setTableData(converted);
-                const courseAction = await dispatch(getCourses());
-                if (getCourses.fulfilled.match(courseAction)) {
-                    setAllCourses(courseAction.payload);
-                }
             } catch (error) {
                 message.error((error as any).message);
                 setTableData([]);
@@ -145,15 +197,6 @@ export default function Statistical() {
             }
         };
         fetchAndFilterData();
-
-        console.log(allCourses);
-        
-        // const colorPalette = ["#2563EB", "#059669", "#7C3AED", "#F59E0B", "#DC2626"];
-        // statsData = allCourses.map((course, index) => ({
-        //     type: course.name,
-        //     quantity: index,
-        //     color: colorPalette[index % colorPalette.length],
-        // }))
     }, [perPage, currentPage, courseFilter, emailFilter, dateFilterChosen]);
 
     return (
@@ -174,7 +217,13 @@ export default function Statistical() {
                 ))}
             </Row>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm mb-6"><Column {...config} /></div>
+            {
+                chartLoading
+                    ? <div style={{ padding: 40, textAlign: 'center' }}><Spin indicator={<LoadingOutlined spin />} /><span className='ms-3'>Đang tải biểu đồ...</span></div>
+                    : (Array.isArray((config as any).data) && (config as any).data.length > 0
+                        ? <Column {...(config as any)} />
+                        : <div style={{ padding: 40, textAlign: 'center' }}><Empty description="Không có dữ liệu biểu đồ" /></div>)
+            }
 
             <div className="bg-white p-6 rounded-lg shadow-sm mb-6" id='filterAction'>
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Bộ lọc</h3>
