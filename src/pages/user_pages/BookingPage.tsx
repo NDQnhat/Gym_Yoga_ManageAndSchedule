@@ -13,7 +13,7 @@ import { validateBookingModal } from '../../utils/core/validate.booking_modal';
 import { apis } from '../../apis';
 import dayjs from 'dayjs';
 
-interface DataEditType {
+export interface DataEditType {
   bookingDate: string,
   bookingTime: string,
 }
@@ -275,7 +275,7 @@ export default function BookingPage() {
             <h2 className="text-[30px] font-semibold">Quản lý lịch tập</h2>
             <Button type="primary" size="large" onClick={() => {
               setModalType('add');
-              showModal()
+              showModal();
             }}>
               Đặt lịch mới
             </Button>

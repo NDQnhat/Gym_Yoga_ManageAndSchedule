@@ -1,7 +1,14 @@
-import { Button, Empty, Space, Table } from 'antd';
-import React from 'react'
+import { Button, Empty, message, Space, Table } from 'antd';
+import React, { useEffect, useState } from 'react'
+import type { Course } from '../../types/course.type';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../../stores';
+import { getCourses } from '../../stores/thunk/course.thunk';
 
 export default function ServicesManagement() {
+    const [allCourses, setAllCourses] = useState<Course[]>([]);
+    const dispatch = useDispatch<AppDispatch>();
+
     const columns = [
         {
             title: 'Tên dịch vụ',
@@ -14,16 +21,18 @@ export default function ServicesManagement() {
             dataIndex: 'description',
             key: 'description',
             width: '45%',
+            ellipsis: true, //dau' ...
         },
         {
             title: 'Hình ảnh',
-            dataIndex: 'image',
-            key: 'image',
+            dataIndex: 'imageUrl',
+            key: 'imageUrl',
             width: '20%',
             render: (text: string) => (
-                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-400">
-                    {text || 'No image'}
-                </div>
+                // <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-400">
+                //     {text || 'No image'}
+                // </div>
+                <img src={text} alt="No image" className='w-16 h-16 bg-gray-200 rounded flex items-center justify-center text-gray-400' />
             ),
         },
         {
@@ -32,14 +41,46 @@ export default function ServicesManagement() {
             width: '20%',
             render: () => (
                 <Space size="small">
-                    <Button type="link" className="text-blue-500" >Sửa</Button>
-                    <Button type="link" danger>Xóa</Button>
+                    <Button type="link" className="p-0" onClick={() => {
+                        // // console.log("record: ", record);
+                        // setCurrentDataEdit({ bookingDate: record.bookingDate, bookingTime: record.bookingTime });
+                        // setDataToUpdate({
+                        //     id: record.bookingId,
+                        //     userId: record.userId,
+                        //     status: "confirmed",
+                        //     courseId: record.courseId,
+                        //     bookingTime: record.bookingTime,
+                        //     bookingDate: record.bookingDate,
+                        // });
+                        // setDateChosen(record.bookingDate);
+                        // setModalType("edit");
+                        // setIsModalOpen(true);
+                    }}>Sửa</Button>
+                    <Button type="link" onClick={() => {
+                        // setConfirmToDel(true);
+                        // setBookingIdToDelete(record.bookingId);
+                    }} danger className="p-0">Xóa</Button>
                 </Space>
             ),
         },
     ];
 
-    const data: any = [];
+    useEffect(() => {
+        const fetchCoursesData = async () => {
+            try {
+                const courseAction = await dispatch(getCourses());
+                if (getCourses.fulfilled.match(courseAction)) {
+                    setAllCourses(courseAction.payload);
+                    return;
+                }
+                setAllCourses([]);
+            } catch (error) {
+                setAllCourses([]);
+                message.error((error as any).message);
+            }
+        }
+        fetchCoursesData();
+    }, [dispatch]);
 
     return (
         <div className="px-6 py-7">
@@ -49,11 +90,8 @@ export default function ServicesManagement() {
             </div>
             <Table
                 columns={columns}
-                dataSource={data}
-                // pagination={{
-                //     pageSize: 10,
-                //     showSizeChanger: true,
-                // }}
+                dataSource={allCourses}
+                pagination={false}
                 locale={{
                     emptyText: <Empty description="Bạn chưa có dịch vụ nào!!" />,
                 }}

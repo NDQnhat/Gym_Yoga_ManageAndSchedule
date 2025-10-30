@@ -8,6 +8,7 @@ import AdminLayout from './pages/admin_pages/AdminLayout'
 import ServicesManagement from './pages/admin_pages/ServicesManagement'
 import Statistical from './pages/admin_pages/Statistical'
 import ProtectAdmin from './ProtectAdmin'
+import UserManagement from './pages/admin_pages/UserManagement'
 
 export default function RouterConfig() {
   return (
@@ -19,6 +20,7 @@ export default function RouterConfig() {
       <Route path='/admin' element={<ProtectAdmin><AdminLayout /></ProtectAdmin>} >
         <Route index element={<Statistical />} />
         <Route path='services' element={<ServicesManagement />} />
+        <Route path='manage-users' element={<UserManagement />} />
       </Route>
     </Routes>
   )

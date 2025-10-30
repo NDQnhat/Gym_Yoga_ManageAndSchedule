@@ -2,14 +2,6 @@ import axios from "axios";
 import type { FormSignup } from "../../auth/Register";
 import type { FormSignin } from "../../auth/Login";
 
-// export interface UserDTO {
-//   email: string;
-//   password: string;
-//   fullName: string;
-//   phone: string;
-//   role?: string;
-// }
-
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:888';
 
 export const UserApi = {

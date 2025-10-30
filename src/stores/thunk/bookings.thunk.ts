@@ -95,7 +95,7 @@ export const updateBookings = createAsyncThunk<void, {id: string, newData: Booki
     await apis.bookingsApi.updateBookings(id, newData);
 });
 
-export const getAllUsersBookingsPaginate = createAsyncThunk<Bookings[], {currentPage: number, perPage: number, email: string, course: string, date: string}>("fetchAllUsersBookingsData", async ({currentPage, perPage, email, course, date}) => {
+export const getAllUsersBookingsPaginate = createAsyncThunk<any, {currentPage: number, perPage: number, email: string, course: string, date: string}>("fetchAllUsersBookingsData", async ({currentPage, perPage, email, course, date}) => {
     let res = await apis.bookingsApi.getAllWithFilterPagination(currentPage, perPage, email, course, date);
     return res;
 });

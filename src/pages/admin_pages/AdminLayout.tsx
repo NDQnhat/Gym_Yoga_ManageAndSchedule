@@ -5,18 +5,21 @@ import {
   PieChartOutlined,
   PoweroffOutlined,
   ScheduleOutlined,
+  UserOutlined,
 } from '@ant-design/icons';
-import { Outlet, useNavigate } from 'react-router'
+import { Outlet, useLocation, useNavigate } from 'react-router'
 
 const { Sider, Content } = Layout;
 
 export default function AdminLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const menuItems = [
     { key: 'bookings', icon: <PieChartOutlined />, label: 'Quản lý lịch' },
-    { key: 'services', icon: <ScheduleOutlined />, label: 'Quản lý dịch vụ' },
+    { key: 'courses', icon: <ScheduleOutlined />, label: 'Quản lý khóa học' },
+    { key: 'users', icon: <UserOutlined />, label: 'Quản lý người dùng' },
     { key: 'home', icon: <HomeOutlined />, label: 'Trang chủ' },
     { key: 'logout', icon: <PoweroffOutlined />, label: 'Đăng xuất', danger: true },
   ];
@@ -25,11 +28,14 @@ export default function AdminLayout() {
     const { key } = info;
 
     switch (key) {
-      case "services":
+      case "courses":
         navigate("/admin/services");
         break;
       case "bookings":
         navigate("/admin");
+        break;
+      case "users":
+        navigate("/admin/manage-users");
         break;
       case "home":
         navigate("/");
@@ -43,6 +49,14 @@ export default function AdminLayout() {
         break;
     }
   }
+
+  const getMenuKeyByPath = (pathname: string) => {
+    if (pathname === '/admin' || pathname === '/admin/') return 'bookings';
+    if (pathname.includes('/admin/services')) return 'courses';
+    if (pathname.includes('/admin/manage-users')) return 'users';
+    return '';
+  };
+  const selectedKey = getMenuKeyByPath(location.pathname);
 
   return (
     <Layout className="h-full">
@@ -58,7 +72,8 @@ export default function AdminLayout() {
         </div>
         <Menu
           theme="dark"
-          defaultSelectedKeys={['bookings']}
+          // defaultSelectedKeys={['bookings']}
+          selectedKeys={[selectedKey]}
           mode="inline"
           items={menuItems}
           onClick={handleDashboardClick}

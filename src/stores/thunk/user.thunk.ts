@@ -5,7 +5,7 @@ import type { FormSignup } from "../../auth/Register";
 import type { FormSignin } from "../../auth/Login";
 
 interface UserState {
-  data: User | null;
+  data: User | null | User[];
   loading: boolean;
   error: string;
 }
@@ -55,13 +55,23 @@ export const userThunk = createSlice({
         state.loading = false;
         state.error = action.error.message || "Fail to Sign in!!";
       })
+      .addCase(fetchUsersData.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchUsersData.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(fetchUsersData.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
   },
 });
 
-// const fetchUserData = createAsyncThunk("user/fetchUserData", async () => {
-//   // let result = await Apis.user.findById(localStorage.getItem("userLogin"))
-//   // return result.data
-// });
+export const fetchUsersData = createAsyncThunk("users/fetchData", async () => {
+  let result = await apis.userApi.getAllUsers();
+  return result;
+});
 
 export const postUser = createAsyncThunk("user/postUser", async (data: FormSignup) => {
   let result = await apis.userApi.registerUser(data);
