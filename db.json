@@ -73,6 +73,14 @@
       "description": "Cải thiện sự linh hoạt, cân bằng và thư giãn tâm trí.",
       "price": 150000,
       "imageUrl": "https://www.bing.com/th/id/OIP.OmBkv7PppxKDUYQVaawapAHaEo?w=272&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2"
+    },
+    {
+      "id": "d024",
+      "name": "Tập tạ",
+      "type": "Tập",
+      "description": "Tập luyện để gánh vác những Lão Lục của team :))))))))))",
+      "price": 158827,
+      "imageUrl": "https://www.bing.com/th/id/OIP.gNFe7uHi9FOel7VqD6-olgHaHa?w=195&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2"
     }
   ],
   "bookings": [

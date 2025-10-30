@@ -278,7 +278,7 @@ export default function Statistical() {
             setChartLoading(true);
             try {
                 const results = await Promise.allSettled(
-                    allCourses.map((course) => apis.bookingsApi.getCourseBookingQuantity(course.id))
+                    allCourses.map((course) => apis.bookingsApi.getCourseBookingQuantity(course.id as string))
                 );
                 // console.log(results);
 

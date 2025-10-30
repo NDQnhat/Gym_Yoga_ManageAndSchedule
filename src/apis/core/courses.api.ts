@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Course } from "../../types/course.type";
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:888';
 
@@ -26,5 +27,34 @@ export const CourseApi = {
     }
   },
 
-  queryCourses: async (id: string) => {}
+  postNewCourses: async (data: Course) => {
+    try {
+      const res = await axios.post(`${API_URL}/courses`, data);
+      return res.data;
+    } catch (error) {
+      throw {
+        message: "Fail to make new Courses: " + error,
+      };
+    }
+  },
+
+  removeCourse: async (id: string) => {
+    try {
+      await axios.delete(`${API_URL}/courses/${id}`);
+    } catch (error) {
+      throw {
+        message: "Fail to delete course!!", error,
+      };
+    }
+  },
+
+  updateCourse: async (id: string, newData: Course) => {
+    try {
+      let res = await axios.patch(`${API_URL}/courses/${id}`, newData);
+    } catch (error) {
+      throw {
+        message: "Fail to update booking!!", error,
+      };
+    }
+  },
 };

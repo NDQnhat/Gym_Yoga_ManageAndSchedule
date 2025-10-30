@@ -1,11 +1,3 @@
-
-/**
- * Validate booking modal form data
- * @param form { userId, courseId, bookingDate, bookingTime }
- * @param existingBookings Array of existing bookings (Bookings[])
- * @returns errors object: { field: string, message: string }[]
- */
-
 import type { Bookings } from "../../types/bookings.type";
 
 export interface BookingModalForm {

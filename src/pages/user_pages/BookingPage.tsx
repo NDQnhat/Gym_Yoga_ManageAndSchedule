@@ -149,12 +149,12 @@ export default function BookingPage() {
     const bookingDate = dateChosen;
     const bookingTime = (e.target as any).bookingTime?.value || '';
 
-    const isValid = await checkExistance(userId, courseId, bookingDate, bookingTime);
+    const isValid = await checkExistance(userId, courseId as string, bookingDate, bookingTime);
     if (!isValid) return;
 
     const newBookings: Bookings = {
       userId,
-      courseId,
+      courseId: courseId as string,
       status: "confirmed",
       bookingTime,
       bookingDate
