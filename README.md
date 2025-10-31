@@ -153,18 +153,23 @@
    git clone https://github.com/NDQnhat/Gym_Yoga_ManageAndSchedule.git
 
 2. Navigate to the project directory:
+    ```bash
     cd Gym_Yoga_ManageAndSchedule
 
 3. Install dependencies:
+    ```bash
    npm install
 
 4. Create a .env file in the root directory:
+
     VITE_API_URL=http://localhost:888
 
 5. Start the frontend:
+    ```bash
     npm run dev
 
 6. Run the JSON server:
+    ```bash
     npm run server
 
 
