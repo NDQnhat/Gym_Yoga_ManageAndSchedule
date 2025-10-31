@@ -1,10 +1,12 @@
-import { Button, Form, Input, Modal, message } from 'antd';
+import { Button, Form, Input, Modal, Upload, message } from 'antd';
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router';
 import type { User } from '../../types/user.type';
 import { apis } from '../../apis';
 import Header from '../../components/Header';
 import { uploadToCloudinary } from '../../utils/core/upload_image.cloudinary';
+import Icon from '@ant-design/icons';
+import Dragger from 'antd/es/upload/Dragger';
 
 export interface UserEditForm {
     email: string;
@@ -22,11 +24,11 @@ export default function UserInfo() {
     const navigate = useNavigate();
 
     // States
-    const [userData, setUserData] = useState<User>({avatarUrl: "", fullname: "", email: "", phoneNum: "", password: "", role: "user" });
+    const [userData, setUserData] = useState<User>({ avatarUrl: "", fullname: "", email: "", phoneNum: "", password: "", role: "user" });
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-    const [editForm, setEditForm] = useState<UserEditForm>({  email: "", phoneNum: "", avatar: null });
-    const [passwordForm, setPasswordForm] = useState<PasswordChangeForm>({ oldPassword: "", newPassword: "",  confirmPassword: "" });
+    const [editForm, setEditForm] = useState<UserEditForm>({ email: "", phoneNum: "", avatar: null });
+    const [passwordForm, setPasswordForm] = useState<PasswordChangeForm>({ oldPassword: "", newPassword: "", confirmPassword: "" });
 
     const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -142,7 +144,7 @@ export default function UserInfo() {
     useEffect(() => {
         const fetchUserData = async () => {
             console.log(import.meta.env);
-            
+
             try {
                 const userId = localStorage.getItem("currentUserId");
                 if (!userId) {
@@ -153,10 +155,10 @@ export default function UserInfo() {
 
                 const user = await apis.userApi.getUserData(userId);
                 console.log(user);
-                
+
                 if (user) {
                     setUserData(user);
-                    
+
                     setEditForm({
                         email: user.email,
                         phoneNum: user.phoneNum,
@@ -172,7 +174,7 @@ export default function UserInfo() {
 
     return (
         <div className="min-h-screen bg-gray-100">
-            <Header/>
+            <Header />
 
             <main className="max-w-4xl mx-auto mt-8 p-6">
                 <div className="bg-white rounded-lg shadow-md p-6">
@@ -229,13 +231,8 @@ export default function UserInfo() {
                             />
                         </Form.Item>
                         <Form.Item label="Avatar">
-                            <input
-                                name="avatar"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleAvatarChange}
-                                className="w-full"
-                            />
+                            <input name="avatar" type="file" accept="image/*" onChange={handleAvatarChange}
+                                className="w-full cursor-pointer border px-2 rounded bg-gray-500 text-white" />
                         </Form.Item>
                     </Form>
                 </form>
