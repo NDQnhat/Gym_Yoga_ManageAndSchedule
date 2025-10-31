@@ -8,6 +8,7 @@ import type { Course } from '../../types/course.type'
 // import { message } from 'antd'
 import { useDispatch, useSelector } from 'react-redux'
 import type { AppDispatch, StoreType } from '../../stores'
+import { message } from 'antd'
 
 export default function Home() {
     const navigate = useNavigate();
@@ -28,7 +29,13 @@ export default function Home() {
                 <div className="relative text-center text-white z-956">
                     <h2 className="text-[50px] font-bold mb-4">Welcome to Our Gym</h2>
                     <p className="text-xl mb-6 text-[30px]">Transform Your Body, Transform Your Life</p>
-                    <button onClick={() => navigate("/booking")} className="bg-blue-600 text-white ps-[32px] pe-[37px] py-2 rounded-lg hover:bg-blue-700 transition text-lg font-medium cursor-pointer">
+                    <button onClick={() => {
+                    if(localStorage.getItem("currentUserId")) {
+                        navigate("/booking");
+                        return;
+                    }
+                    message.error("Log in required!!");
+                }} className="bg-blue-600 text-white ps-[32px] pe-[37px] py-2 rounded-lg hover:bg-blue-700 transition text-lg font-medium cursor-pointer">
                         Bắt đầu ngay
                     </button>
                 </div>

@@ -4,6 +4,7 @@ import type { User } from '../../types/user.type';
 import { useDispatch } from 'react-redux';
 import type { AppDispatch } from '../../stores';
 import { deleteUser, fetchUsersData, postUser, updateUser } from '../../stores/thunk/user.thunk';
+import { apis } from '../../apis';
 
 export default function UserManagement() {
     const [allUsers, setAllUsers] = useState<User[]>([]);
@@ -292,6 +293,7 @@ export default function UserManagement() {
                 onOk={async () => {
                     if (userIdToDelete) {
                         try {
+                            await apis.bookingsApi.deleteManyBookings("", userIdToDelete); //xoa' bookings user dang kys
                             await dispatch(deleteUser(userIdToDelete));
                             message.success("Delete successfully!");
                             setConfirmToDel(false);

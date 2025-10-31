@@ -70,6 +70,18 @@ export const BookingsApi = {
       };
     }
   },
+
+  getAllBookings: async () => {
+    try {
+      let result = await axios.get(`${API_URL}/bookings`);
+      return result.data;
+    } catch (error) {
+      throw {
+        message: "Lỗi: " + error,
+      };
+    }
+  },
+
   removeBookings: async (id: string) => {
     try {
       await axios.delete(`${API_URL}/bookings/${id}`);
@@ -180,6 +192,34 @@ export const BookingsApi = {
     } catch (error) {
       throw {
         message: "Lỗi lấy tổng số lượt đặt",
+      }
+    }
+  },
+
+  deleteManyBookings: async (courseId: string, userId: string) => {
+    let allBookings = await apis.bookingsApi.getAllBookings();
+    try {
+      if(userId === "") {
+        const bookingsToDel = allBookings.filter((bookings: Bookings) => {
+          return bookings.courseId === courseId
+        });
+
+        await Promise.all(bookingsToDel.map((b: Bookings) => {
+          return axios.delete(`${API_URL}/bookings/${b.id}`);
+        }));
+        return;
+      }
+
+      if(courseId === "") {
+        const bookingsToDel = allBookings.filter((bookings: Bookings) => bookings.userId === userId);
+
+        await Promise.all(bookingsToDel.map((b: Bookings) => {
+          return axios.delete(`${API_URL}/bookings/${b.id}`);
+        }));
+      }
+    } catch (error) {
+      throw {
+        message: "fail to delete bookings with course deleted!!", error,
       }
     }
   }

@@ -264,8 +264,12 @@ export default function ServicesManagement() {
                 open={confirmToDel}
                 onOk={async () => {
                     if (courseIdToDel) {
+                        console.log(courseIdToDel);
+                        
                         try {
-                            await dispatch(deleteCourse(courseIdToDel));
+                            //cho vao` dispatch thi` bieu? do` se~ tu. update
+                            await apis.bookingsApi.deleteManyBookings(courseIdToDel, ""); //xoa' nhung~ bookings cua? user cho khoa' hoc. nay`
+                            await dispatch(deleteCourse(courseIdToDel));// bi. nguuuu di xoa' course roi` moi' xoa' bookings /(o0o)/
                             message.success("Delete successfully!");
                             setConfirmToDel(false);
 

@@ -1,10 +1,11 @@
+import { message } from 'antd';
 import React from 'react'
 import { useNavigate } from 'react-router'
 
 interface PropsType {
     image: string,
-    title: string, 
-    description: string, 
+    title: string,
+    description: string,
 }
 
 export default function Card({ image, title, description }: PropsType) {
@@ -31,7 +32,13 @@ export default function Card({ image, title, description }: PropsType) {
             <div className="p-6">
                 <h3 className="text-[20px] md:text-[18px] font-bold mb-2">{title}</h3>
                 <p className="text-gray-600 mb-4 text-[16px] md:text-[14px] pe-[20px]">{description}</p>
-                <button onClick={() => navigate("/booking")} className="bg-blue-600 text-white px-4 py-[8px] rounded hover:bg-blue-700 transition cursor-pointer">
+                <button onClick={() => {
+                    if(localStorage.getItem("currentUserId")) {
+                        navigate("/booking");
+                        return;
+                    }
+                    message.error("Log in required!!");
+                }} className="bg-blue-600 text-white px-4 py-[8px] rounded hover:bg-blue-700 transition cursor-pointer">
                     Đặt lịch
                 </button>
             </div>

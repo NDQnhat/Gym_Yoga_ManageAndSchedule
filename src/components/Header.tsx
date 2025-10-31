@@ -46,9 +46,10 @@ export default function Header() {
                             <button className="hover:text-gray-300 cursor-pointer" onClick={() => {
                                 navigate("/booking");
                             }}>Lịch tập</button></>
-                        : <button className="hover:text-gray-300 cursor-pointer" onClick={() => {
+                        : <div className='flex gap-5 items-center'><button className="hover:text-gray-300 cursor-pointer" onClick={() => {
                             navigate("/booking");
                         }}>Lịch tập</button>
+                        <i className="fa-solid fa-circle-user cursor-pointer fa-lg" onClick={() => {navigate("/user-info")}}></i></div>
                     }
 
                     {username ? (

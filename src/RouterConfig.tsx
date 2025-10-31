@@ -9,6 +9,7 @@ import ServicesManagement from './pages/admin_pages/ServicesManagement'
 import Statistical from './pages/admin_pages/Statistical'
 import ProtectAdmin from './ProtectAdmin'
 import UserManagement from './pages/admin_pages/UserManagement'
+import UserInfo from './pages/user_pages/UserInfo'
 
 export default function RouterConfig() {
   return (
@@ -17,6 +18,7 @@ export default function RouterConfig() {
       <Route path='/signup' element={<Register />} />
       <Route path='/' element={<Home />} />
       <Route path='/booking' element={<BookingPage />} />
+      <Route path='/user-info' element={<UserInfo />} />
       <Route path='/admin' element={<ProtectAdmin><AdminLayout /></ProtectAdmin>} >
         <Route index element={<Statistical />} />
         <Route path='services' element={<ServicesManagement />} />
