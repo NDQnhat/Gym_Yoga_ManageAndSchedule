@@ -1,25 +1,25 @@
-# 🏋️‍♀️ Gym & Yoga Class Booking Management Website
+#  Gym & Yoga Class Booking Management Website
 
 > A full-featured website for booking and managing Gym, Yoga, Zumba, and other fitness classes — including user authentication, scheduling, role-based permissions, and an admin dashboard.  
 > Built with **React + TypeScript + Redux Toolkit + Tailwind CSS + React Hook Form**.
 
 ---
 
-## 🚀 UI Demo
+##  UI Demo
 
 | Page | Preview |
 |------|----------|
-| 🏠 **Home Page** | ![Home Page](/assets/homepage.png) |
-| 📅 **Booking Page (User)** | ![Booking Page](/src/assets/booking-page.png) |
-| 👩‍💼 **Admin Dashboard** | ![Admin Dashboard](/src/assets/admin-dashboard.png) |
-| 🧘 **Course List (Card Layout)** | ![Course List](/src/assets/course-list.png) |
-| 📊 **Statistics Chart** | ![Statistics Chart](/src/assets/statistics-chart.png) |
+|  **Home Page** | ![Home Page](/src/assets/homepage.png) |
+|  **Booking Page (User)** | ![Booking Page](/src/assets/booking-page.png) |
+|  **Admin Dashboard** | ![Admin Dashboard](/src/assets/admin-dashboard.png) |
+|  **Course List (Card Layout)** | ![Course List](/src/assets/course-list.png) |
+|  **Statistics Chart** | ![Statistics Chart](/src/assets/statistics-chart.png) |
 
 ---
 
-## 🧩 Core Features
+##  Core Features
 
-### 👤 User
+###  User
 - Register / Login using **React Hook Form + Redux Toolkit**.
 - Email format, password length, and confirmation validation.
 - Automatically save user data and roles in **localStorage**.
@@ -28,7 +28,7 @@
 - Paginated booking list for better navigation.
 - Protected routes: only logged-in users can access booking pages.
 
-### 🧑‍💼 Admin
+###  Admin
 - Manage all users and bookings.
 - Add, edit, or delete courses (Gym, Yoga, Zumba, etc.).
 - Filter by Email, Course, or Date (with debounce).
@@ -36,7 +36,7 @@
 - Show visual statistics (Pie/Bar Charts) of total bookings per course.
 - Data handled via **createAsyncThunk** (`GET /bookings`).
 
-### 💡 Additional Features
+###  Additional Features
 - Fetch class data from **GET /courses**, sorted alphabetically (A → Z).
 - Modern and responsive design using **Tailwind CSS**.
 - Dynamic Navbar & Sidebar depending on login state and role.
@@ -44,7 +44,7 @@
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Technology | Description |
 |-------------|--------------|
@@ -58,7 +58,7 @@
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```bash
 ├── .env
