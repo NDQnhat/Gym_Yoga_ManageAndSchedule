@@ -60,6 +60,7 @@
 
 ## 📂 Project Structure
 
+```bash
 ├── .env
 ├── .gitignore
 ├── db.json
@@ -92,12 +93,6 @@
     │       └── user.api.ts
     │
     ├── assets/
-    │   ├── cardimg1.png
-    │   ├── cardimg2.png
-    │   ├── cardimg3.png
-    │   ├── gym-bg.jpg
-    │   ├── home-gym-bg-test.jpg
-    │   └── react.svg
     │
     ├── auth/
     │   ├── Login.tsx
@@ -144,6 +139,7 @@
             ├── validate.booking_modal.ts
             ├── validate.course_modal.ts
             └── validation.ts
+```
 
 
 ## Installation
