@@ -1,25 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Input, Upload, Button, message } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined, UploadOutlined, UserOutlined, MailOutlined, PhoneOutlined, LockOutlined } from '@ant-design/icons';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+import type { User } from '../../types/user.type';
+import { useDispatch } from 'react-redux';
+import type { AppDispatch } from '../../stores';
+import { } from '../../stores/thunk/user.thunk';
+import { apis } from '../../apis';
+import { Cloudinary } from '@cloudinary/url-gen/index';
 
 const UserProfile = () => {
-    const [userData, setUserData] = useState({
-        avatar: 'https://ui-avatars.com/api/?name=Nguyen+Van+A&background=4F46E5&color=fff&size=200',
-        fullname: 'Nguyễn Văn A',
-        email: 'nguyenvana@example.com',
-        phoneNum: '0123456789',
-        password: '********'
-    });
-
+    const [userData, setUserData] = useState<User>({ avatarUrl: "", fullname: "", email: "", phone: "", password: "", role: "user", });
     const [showPassword, setShowPassword] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
+    const dispatch = useDispatch<AppDispatch>();
+    const cld = new Cloudinary({
+        cloud: {
+            cloudName: 'demo'
+        }
+    });
+
     const [editForm, setEditForm] = useState({
         email: userData.email,
-        phoneNum: userData.phoneNum,
+        phoneNum: userData.phone,
         avatar: null
     });
 
@@ -38,8 +44,8 @@ const UserProfile = () => {
         setUserData({
             ...userData,
             email: editForm.email,
-            phoneNum: editForm.phoneNum,
-            avatar: editForm.avatar || userData.avatar
+            phone: editForm.phoneNum,
+            avatarUrl: editForm.avatar || userData.avatarUrl,
         });
 
         message.success('Cập nhật thông tin thành công!');
@@ -68,7 +74,7 @@ const UserProfile = () => {
     };
 
     const uploadProps = {
-        beforeUpload: (file) => {
+        beforeUpload: (file: File) => {
             const isImage = file.type.startsWith('image/');
             if (!isImage) {
                 message.error('Chỉ được tải lên file ảnh!');
@@ -85,6 +91,18 @@ const UserProfile = () => {
         maxCount: 1
     };
 
+    useEffect(() => {
+        const userId = localStorage.getItem("currentUserId");
+        const fetchUser = async () => {
+            try {
+                const data = await apis.userApi.getUserData(userId as string);
+                setUserData(data);
+            } catch (error) {
+                message.error((error as any).message);
+            }
+        }
+    }, []);
+
     return (
         <>
             <Header />
@@ -96,7 +114,7 @@ const UserProfile = () => {
                         {/* Avatar */}
                         <div className="flex-shrink-0">
                             <img
-                                src={userData.avatar}
+                                src={userData.avatarUrl}
                                 alt="Avatar"
                                 className="w-40 h-40 rounded-full object-cover border-4 border-indigo-200 shadow-lg"
                             />
@@ -131,7 +149,7 @@ const UserProfile = () => {
                                         Số điện thoại
                                     </label>
                                     <div className="text-lg font-medium text-gray-800 bg-gray-50 px-4 py-3 rounded-lg">
-                                        {userData.phoneNum}
+                                        {userData.phone}
                                     </div>
                                 </div>
 
@@ -160,7 +178,7 @@ const UserProfile = () => {
                                     onClick={() => {
                                         setEditForm({
                                             email: userData.email,
-                                            phoneNum: userData.phoneNum,
+                                            phoneNum: userData.phone,
                                             avatar: null
                                         });
                                         setIsEditModalOpen(true);
@@ -280,7 +298,7 @@ const UserProfile = () => {
                     </div>
                 </Modal>
             </div>
-            <Footer/>
+            <Footer />
         </>
     );
 };

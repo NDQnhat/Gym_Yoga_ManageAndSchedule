@@ -20,6 +20,7 @@ export const UserApi = {
       phoneNum: data.phoneNum,
       password: data.password,
       role: data.role || "user",
+      avatarUrl: "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
     });
 
     return res.data;
@@ -56,6 +57,17 @@ export const UserApi = {
     }
 
     return user.data.fullname;
+  },
+
+  getUserData: async (id: string) => {
+    try {
+      const res = await axios.get(`${API_URL}/users/${id}`);
+      return res.data
+    } catch (error) {
+      throw {
+        message: "Fail to get user data!!", error,
+      }
+    }
   },
 
   findEmailById: async (id: string) => {

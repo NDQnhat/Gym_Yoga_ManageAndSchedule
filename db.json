@@ -2,6 +2,7 @@
   "users": [
     {
       "id": "1",
+      "avatarUrl": "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
       "email": "admin@gym.com",
       "password": "adminpassword",
       "fullname": "Quản Trị Viên",
@@ -10,6 +11,7 @@
     },
     {
       "id": "2",
+      "avatarUrl": "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
       "email": "user1@mail.com",
       "password": "userpassword",
       "fullname": "Nguyễn Văn A",
@@ -18,6 +20,7 @@
     },
     {
       "id": "237a",
+      "avatarUrl": "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
       "fullname": "asdsad",
       "email": "nva@gmail.com",
       "phoneNum": "0987654321",
@@ -26,6 +29,7 @@
     },
     {
       "id": "076e",
+      "avatarUrl": "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
       "fullname": "asdsadgg",
       "email": "nvb@gmail.com",
       "phoneNum": "0987654321",
@@ -34,6 +38,7 @@
     },
     {
       "id": "dbef",
+      "avatarUrl": "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
       "fullname": "asdsad",
       "email": "nvab@gmail.com",
       "phoneNum": "0987654321",
@@ -42,6 +47,7 @@
     },
     {
       "id": "05d1",
+      "avatarUrl": "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
       "fullname": "Người Dùng 1761874445591",
       "email": "abc@gmail.com",
       "phoneNum": "0987654321",
@@ -89,14 +95,6 @@
       "description": "Tập luyện để gánh vác những Lão Lục của team :))))))))))",
       "price": 158827,
       "imageUrl": "https://www.bing.com/th/id/OIP.gNFe7uHi9FOel7VqD6-olgHaHa?w=195&h=211&c=8&rs=1&qlt=90&o=6&dpr=1.3&pid=3.1&rm=2"
-    },
-    {
-      "id": "9a82",
-      "name": "adsad",
-      "type": "adsad",
-      "description": "afrweq",
-      "price": 123642,
-      "imageUrl": "fytrw"
     }
   ],
   "bookings": [

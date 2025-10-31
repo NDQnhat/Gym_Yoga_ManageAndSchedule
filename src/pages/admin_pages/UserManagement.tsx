@@ -13,7 +13,7 @@ export default function UserManagement() {
     const [modalType, setModalType] = useState<"add" | "edit">("add");
     const [confirmToDel, setConfirmToDel] = useState(false);
     const [currentDataToEdit, setCurrentDataEdit] = useState<{ email: string, phoneNum: string, role: "" }>({ email: "", phoneNum: "", role: "" });
-    const [dataToUpdate, setDataToUpdate] = useState<User>({ email: "", fullname: "", password: "", phone: "", role: "user" });
+    const [dataToUpdate, setDataToUpdate] = useState<User>({ email: "", fullname: "", password: "", phone: "", role: "user", avatarUrl: "" });
     const [userIdToDelete, setUserIdToDelete] = useState<string>("");
 
     const dispatch = useDispatch<AppDispatch>();
@@ -76,6 +76,7 @@ export default function UserManagement() {
                                 password: record.password,
                                 phone: record.phoneNum,
                                 role: record.role,
+                                avatarUrl: record.avatarUrl,
                             });
                             setModalType("edit");
                             setIsModalOpen(true);
@@ -115,6 +116,7 @@ export default function UserManagement() {
             password: "12345678",
             phone: phoneNum as string,
             role,
+            avatarUrl: "https://res.cloudinary.com/dlkwv0qaq/image/upload/v1761876296/default-avatar-profile_bse2jk.webp",
         };
 
         if (!email || !phoneNum || !role) {
