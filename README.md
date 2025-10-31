@@ -157,8 +157,11 @@
    npm install
 
 4. Create a .env file in the root directory:
-
-    VITE_API_URL=http://localhost:888
+    ```bash
+    VITE_API_URL='http://localhost:888'
+    VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloudname
+    VITE_CLOUDINARY_API_KEY=your_cloudinary_api_key
+    VITE_CLOUDINARY_UPLOAD_PRESET=your_cloudinary_upload_preset
 
 5. Start the frontend:
     ```bash

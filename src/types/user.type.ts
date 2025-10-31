@@ -5,5 +5,5 @@ export interface User {
     password: string;
     fullname: string;
     role: 'admin' | 'user';
-    phone: string;
+    phoneNum: string;
 }

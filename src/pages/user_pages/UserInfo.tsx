@@ -1,306 +1,281 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Input, Upload, Button, message } from 'antd';
-import { EyeInvisibleOutlined, EyeOutlined, UploadOutlined, UserOutlined, MailOutlined, PhoneOutlined, LockOutlined } from '@ant-design/icons';
-import Header from '../../components/Header';
-import Footer from '../../components/Footer';
+import { Button, Form, Input, Modal, message } from 'antd';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useNavigate } from 'react-router';
 import type { User } from '../../types/user.type';
-import { useDispatch } from 'react-redux';
-import type { AppDispatch } from '../../stores';
-import { } from '../../stores/thunk/user.thunk';
 import { apis } from '../../apis';
-import { Cloudinary } from '@cloudinary/url-gen/index';
+import Header from '../../components/Header';
+import { uploadToCloudinary } from '../../utils/core/upload_image.cloudinary';
 
-const UserProfile = () => {
-    const [userData, setUserData] = useState<User>({ avatarUrl: "", fullname: "", email: "", phone: "", password: "", role: "user", });
-    const [showPassword, setShowPassword] = useState(false);
+export interface UserEditForm {
+    email: string;
+    phoneNum: string;
+    avatar: File | string | null;
+}
+
+export interface PasswordChangeForm {
+    oldPassword: string;
+    newPassword: string;
+    confirmPassword: string;
+}
+
+export default function UserInfo() {
+    const navigate = useNavigate();
+
+    // States
+    const [userData, setUserData] = useState<User>({avatarUrl: "", fullname: "", email: "", phoneNum: "", password: "", role: "user" });
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+    const [editForm, setEditForm] = useState<UserEditForm>({  email: "", phoneNum: "", avatar: null });
+    const [passwordForm, setPasswordForm] = useState<PasswordChangeForm>({ oldPassword: "", newPassword: "",  confirmPassword: "" });
 
-    const dispatch = useDispatch<AppDispatch>();
-    const cld = new Cloudinary({
-        cloud: {
-            cloudName: 'demo'
-        }
-    });
-
-    const [editForm, setEditForm] = useState({
-        email: userData.email,
-        phoneNum: userData.phone,
-        avatar: null
-    });
-
-    const [passwordForm, setPasswordForm] = useState({
-        oldPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-    });
-
-    const handleEditSubmit = () => {
-        if (!editForm.email || !editForm.phoneNum) {
-            message.error('Vui lòng điền đầy đủ thông tin!');
-            return;
-        }
-
-        setUserData({
-            ...userData,
-            email: editForm.email,
-            phone: editForm.phoneNum,
-            avatarUrl: editForm.avatar || userData.avatarUrl,
-        });
-
-        message.success('Cập nhật thông tin thành công!');
-        setIsEditModalOpen(false);
-    };
-
-    const handlePasswordSubmit = () => {
-        if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
-            message.error('Vui lòng điền đầy đủ thông tin!');
-            return;
-        }
-
-        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-            message.error('Mật khẩu mới không khớp!');
-            return;
-        }
-
-        if (passwordForm.newPassword.length < 6) {
-            message.error('Mật khẩu mới phải có ít nhất 6 ký tự!');
-            return;
-        }
-
-        message.success('Đổi mật khẩu thành công!');
-        setIsPasswordModalOpen(false);
-        setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
-    };
-
-    const uploadProps = {
-        beforeUpload: (file: File) => {
-            const isImage = file.type.startsWith('image/');
-            if (!isImage) {
-                message.error('Chỉ được tải lên file ảnh!');
-                return false;
+    const handleEditSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        try {
+            const userId = localStorage.getItem("currentUserId");
+            if (!userId) {
+                message.error("Please login first!");
+                navigate("/signin");
+                return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setEditForm({ ...editForm, avatar: e.target.result });
+            // Lấy trực tiếp từ state để tránh trường hợp FormData trả về giá trị rỗng
+            const email = (editForm.email || "").trim();
+            const phoneNum = (editForm.phoneNum || "").trim();
+            const avatarFile = (editForm.avatar instanceof File) ? editForm.avatar : null;
+
+            if (!email || !phoneNum) {
+                message.error("Email và SĐT không được để trống!");
+                return;
+            }
+
+            let nextAvatarUrl = userData.avatarUrl;
+
+            if (avatarFile && avatarFile.size > 0) {
+                const hide = message.loading({ content: "Đang upload avatar...", duration: 0 });
+                try {
+                    const uploadedUrl = await uploadToCloudinary(avatarFile as File);
+                    if (uploadedUrl) {
+                        nextAvatarUrl = uploadedUrl;
+                    }
+                } catch (err) {
+                    message.error((err as any)?.message || "Upload ảnh thất bại!!");
+                    hide();
+                    return;
+                }
+                hide();
+            }
+
+            const nothingChanged = (
+                email === userData.email &&
+                phoneNum === userData.phoneNum &&
+                nextAvatarUrl === userData.avatarUrl
+            );
+            if (nothingChanged) {
+                message.warning("Không có thay đổi nào!");
+                setIsEditModalOpen(false);
+                return;
+            }
+
+            const updatedData: User = {
+                ...userData,
+                email,
+                phoneNum,
+                avatarUrl: nextAvatarUrl,
             };
-            reader.readAsDataURL(file);
-            return false;
-        },
-        maxCount: 1
+
+            await apis.userApi.updateUser(userId, updatedData);
+            setUserData(updatedData);
+            setEditForm({ email: updatedData.email, phoneNum: updatedData.phoneNum, avatar: updatedData.avatarUrl });
+            setIsEditModalOpen(false);
+            message.success("Cập nhật hồ sơ thành công!");
+        } catch (error) {
+            message.error((error as any)?.message || "Failed to update profile");
+        }
+    };
+
+    const handlePasswordSubmit = async (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+
+        if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+            message.error("Mật khẩu mới không trùng khớp!");
+            return;
+        }
+
+        if ((passwordForm.newPassword || '').length < 8) {
+            message.error("Mật khẩu phải có ít nhất 8 ký tự!");
+            return;
+        }
+
+        if (passwordForm.oldPassword !== userData.password) {
+            message.error("Mật khẩu cũ không đúng!");
+            return;
+        }
+
+        try {
+            const userId = localStorage.getItem("currentUserId");
+            if (!userId) {
+                message.error("Please login first!");
+                navigate("/signin");
+                return;
+            }
+
+            const updatedData: User = { ...userData, password: passwordForm.newPassword };
+            await apis.userApi.updateUser(userId, updatedData);
+
+            setUserData(updatedData);
+            setIsPasswordModalOpen(false);
+            message.success("Đổi mật khẩu thành công!");
+
+            setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (error) {
+            message.error((error as any)?.message || "Failed to update password");
+        }
+    };
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        if (file) {
+            setEditForm(prev => ({ ...prev, avatar: file }));
+        }
     };
 
     useEffect(() => {
-        const userId = localStorage.getItem("currentUserId");
-        const fetchUser = async () => {
+        const fetchUserData = async () => {
+            console.log(import.meta.env);
+            
             try {
-                const data = await apis.userApi.getUserData(userId as string);
-                setUserData(data);
+                const userId = localStorage.getItem("currentUserId");
+                if (!userId) {
+                    message.error("Please login first!");
+                    navigate("/signin");
+                    return;
+                }
+
+                const user = await apis.userApi.getUserData(userId);
+                console.log(user);
+                
+                if (user) {
+                    setUserData(user);
+                    
+                    setEditForm({
+                        email: user.email,
+                        phoneNum: user.phoneNum,
+                        avatar: user.avatarUrl
+                    });
+                }
             } catch (error) {
-                message.error((error as any).message);
+                message.error("Failed to load user data");
             }
-        }
-    }, []);
+        };
+        fetchUserData();
+    }, [navigate]);
 
     return (
-        <>
-            <Header />
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-                <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-8">Thông Tin Cá Nhân</h1>
+        <div className="min-h-screen bg-gray-100">
+            <Header/>
 
-                    <div className="flex flex-col md:flex-row gap-8">
-                        {/* Avatar */}
-                        <div className="flex-shrink-0">
-                            <img
-                                src={userData.avatarUrl}
-                                alt="Avatar"
-                                className="w-40 h-40 rounded-full object-cover border-4 border-indigo-200 shadow-lg"
-                            />
+            <main className="max-w-4xl mx-auto mt-8 p-6">
+                <div className="bg-white rounded-lg shadow-md p-6">
+                    <div className="flex items-center space-x-4 mb-6">
+                        <img
+                            src={userData.avatarUrl}
+                            alt="Profile"
+                            className="w-32 h-32 rounded-full object-cover"
+                        />
+                        <div>
+                            <h2 className="text-2xl font-bold">{userData.fullname}</h2>
+                            <p className="text-gray-600">{userData.email}</p>
+                            <p className="text-gray-600">{userData.phoneNum}</p>
                         </div>
+                    </div>
 
-                        {/* User Info Grid */}
-                        <div className="flex-grow">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="col-span-1 md:col-span-2">
-                                    <label className="flex items-center text-sm font-semibold text-gray-600 mb-2">
-                                        <UserOutlined className="mr-2 text-indigo-500" />
-                                        Họ và tên
-                                    </label>
-                                    <div className="text-lg font-medium text-gray-800 bg-gray-50 px-4 py-3 rounded-lg">
-                                        {userData.fullname}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="flex items-center text-sm font-semibold text-gray-600 mb-2">
-                                        <MailOutlined className="mr-2 text-indigo-500" />
-                                        Email
-                                    </label>
-                                    <div className="text-lg font-medium text-gray-800 bg-gray-50 px-4 py-3 rounded-lg break-all">
-                                        {userData.email}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label className="flex items-center text-sm font-semibold text-gray-600 mb-2">
-                                        <PhoneOutlined className="mr-2 text-indigo-500" />
-                                        Số điện thoại
-                                    </label>
-                                    <div className="text-lg font-medium text-gray-800 bg-gray-50 px-4 py-3 rounded-lg">
-                                        {userData.phone}
-                                    </div>
-                                </div>
-
-                                <div className="col-span-1 md:col-span-2">
-                                    <label className="flex items-center text-sm font-semibold text-gray-600 mb-2">
-                                        <LockOutlined className="mr-2 text-indigo-500" />
-                                        Mật khẩu
-                                    </label>
-                                    <div className="flex items-center bg-gray-50 px-4 py-3 rounded-lg">
-                                        <span className="text-lg font-medium text-gray-800 flex-grow">
-                                            {showPassword ? 'Abc@123456' : userData.password}
-                                        </span>
-                                        <button
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="ml-2 text-indigo-500 hover:text-indigo-700 transition"
-                                        >
-                                            {showPassword ? <EyeInvisibleOutlined /> : <EyeOutlined />}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Action Buttons */}
-                            <div className="flex gap-4 mt-8">
-                                <button
-                                    onClick={() => {
-                                        setEditForm({
-                                            email: userData.email,
-                                            phoneNum: userData.phone,
-                                            avatar: null
-                                        });
-                                        setIsEditModalOpen(true);
-                                    }}
-                                    className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg"
-                                >
-                                    Đổi Thông Tin
-                                </button>
-                                <button
-                                    onClick={() => setIsPasswordModalOpen(true)}
-                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 px-6 rounded-lg transition shadow-md hover:shadow-lg"
-                                >
-                                    Đổi Mật Khẩu
-                                </button>
-                            </div>
-                        </div>
+                    <div className="space-x-4">
+                        <Button type="primary" onClick={() => setIsEditModalOpen(true)}>
+                            Edit Profile
+                        </Button>
+                        <Button onClick={() => setIsPasswordModalOpen(true)}>
+                            Change Password
+                        </Button>
                     </div>
                 </div>
+            </main>
 
-                {/* Edit Info Modal */}
-                <Modal
-                    title={<span className="text-xl font-bold">Chỉnh Sửa Thông Tin</span>}
-                    open={isEditModalOpen}
-                    onOk={handleEditSubmit}
-                    onCancel={() => setIsEditModalOpen(false)}
-                    okText="Lưu"
-                    cancelText="Hủy"
-                    width={500}
-                    okButtonProps={{ className: 'bg-indigo-600 hover:bg-indigo-700' }}
-                >
-                    <div className="space-y-4 mt-6">
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+            {/* Edit Profile Modal */}
+            <Modal
+                title="Edit Profile"
+                open={isEditModalOpen}
+                onOk={() => {
+                    const form = document.getElementById("modalFormEdit") as HTMLFormElement;
+                    form?.requestSubmit();
+                }}
+                onCancel={() => setIsEditModalOpen(false)}
+                okText="Save"
+                cancelText="Cancel"
+            >
+                <form id="modalFormEdit" onSubmit={handleEditSubmit}>
+                    <Form layout="vertical">
+                        <Form.Item label="Email">
                             <Input
-                                prefix={<MailOutlined />}
+                                name="email"
                                 value={editForm.email}
-                                onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                placeholder="Nhập email"
-                                size="large"
+                                onChange={e => setEditForm(prev => ({ ...prev, email: e.target.value }))}
                             />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                        </Form.Item>
+                        <Form.Item label="Phone">
                             <Input
-                                prefix={<PhoneOutlined />}
+                                name="phoneNum"
                                 value={editForm.phoneNum}
-                                onChange={(e) => setEditForm({ ...editForm, phoneNum: e.target.value })}
-                                placeholder="Nhập số điện thoại"
-                                size="large"
+                                onChange={e => setEditForm(prev => ({ ...prev, phoneNum: e.target.value }))}
                             />
-                        </div>
+                        </Form.Item>
+                        <Form.Item label="Avatar">
+                            <input
+                                name="avatar"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleAvatarChange}
+                                className="w-full"
+                            />
+                        </Form.Item>
+                    </Form>
+                </form>
+            </Modal>
 
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Avatar</label>
-                            <Upload {...uploadProps}>
-                                <Button icon={<UploadOutlined />} size="large" className="w-full">
-                                    Tải lên ảnh đại diện
-                                </Button>
-                            </Upload>
-                            {editForm.avatar && (
-                                <div className="mt-3">
-                                    <img src={editForm.avatar} alt="Preview" className="w-24 h-24 rounded-full object-cover border-2 border-indigo-200" />
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </Modal>
-
-                {/* Change Password Modal */}
-                <Modal
-                    title={<span className="text-xl font-bold">Đổi Mật Khẩu</span>}
-                    open={isPasswordModalOpen}
-                    onOk={handlePasswordSubmit}
-                    onCancel={() => {
-                        setIsPasswordModalOpen(false);
-                        setPasswordForm({ oldPassword: '', newPassword: '', confirmPassword: '' });
-                    }}
-                    okText="Đổi Mật Khẩu"
-                    cancelText="Hủy"
-                    width={500}
-                    okButtonProps={{ className: 'bg-emerald-600 hover:bg-emerald-700' }}
-                >
-                    <div className="space-y-4 mt-6">
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Mật khẩu cũ</label>
+            {/* Change Password Modal */}
+            <Modal
+                title="Change Password"
+                open={isPasswordModalOpen}
+                onOk={() => {
+                    const form = document.getElementById("modalPasswordForm") as HTMLFormElement;
+                    form?.requestSubmit();
+                }}
+                onCancel={() => setIsPasswordModalOpen(false)}
+                okText="Update Password"
+                cancelText="Cancel"
+            >
+                <form id="modalPasswordForm" onSubmit={handlePasswordSubmit}>
+                    <Form layout="vertical">
+                        <Form.Item label="Old Password">
                             <Input.Password
-                                prefix={<LockOutlined />}
                                 value={passwordForm.oldPassword}
-                                onChange={(e) => setPasswordForm({ ...passwordForm, oldPassword: e.target.value })}
-                                placeholder="Nhập mật khẩu cũ"
-                                size="large"
+                                onChange={e => setPasswordForm(prev => ({ ...prev, oldPassword: e.target.value }))}
                             />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Mật khẩu mới</label>
+                        </Form.Item>
+                        <Form.Item label="New Password">
                             <Input.Password
-                                prefix={<LockOutlined />}
                                 value={passwordForm.newPassword}
-                                onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-                                placeholder="Nhập mật khẩu mới"
-                                size="large"
+                                onChange={e => setPasswordForm(prev => ({ ...prev, newPassword: e.target.value }))}
                             />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Xác nhận mật khẩu mới</label>
+                        </Form.Item>
+                        <Form.Item label="Confirm New Password">
                             <Input.Password
-                                prefix={<LockOutlined />}
                                 value={passwordForm.confirmPassword}
-                                onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-                                placeholder="Nhập lại mật khẩu mới"
-                                size="large"
+                                onChange={e => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
                             />
-                        </div>
-                    </div>
-                </Modal>
-            </div>
-            <Footer />
-        </>
+                        </Form.Item>
+                    </Form>
+                </form>
+            </Modal>
+        </div>
     );
-};
-
-export default UserProfile;
+}

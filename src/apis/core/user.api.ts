@@ -62,7 +62,7 @@ export const UserApi = {
   getUserData: async (id: string) => {
     try {
       const res = await axios.get(`${API_URL}/users/${id}`);
-      return res.data
+      return res.data;
     } catch (error) {
       throw {
         message: "Fail to get user data!!", error,
