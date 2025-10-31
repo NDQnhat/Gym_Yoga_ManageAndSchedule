@@ -10,10 +10,10 @@
 | Page | Preview |
 |------|----------|
 | 🏠 **Home Page** | ![Home Page](/assets/homepage.png) |
-| 📅 **Booking Page (User)** | ![Booking Page](/assets/booking-page.png) |
-| 👩‍💼 **Admin Dashboard** | ![Admin Dashboard](/assets/admin-dashboard.png) |
-| 🧘 **Course List (Card Layout)** | ![Course List](/assets/course-list.png) |
-| 📊 **Statistics Chart** | ![Statistics Chart](/assets/statistics-chart.png) |
+| 📅 **Booking Page (User)** | ![Booking Page](/src/assets/booking-page.png) |
+| 👩‍💼 **Admin Dashboard** | ![Admin Dashboard](/src/assets/admin-dashboard.png) |
+| 🧘 **Course List (Card Layout)** | ![Course List](/src/assets/course-list.png) |
+| 📊 **Statistics Chart** | ![Statistics Chart](/src/assets/statistics-chart.png) |
 
 ---
 
